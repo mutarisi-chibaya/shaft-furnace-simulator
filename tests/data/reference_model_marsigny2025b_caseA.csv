@@ -1,0 +1,23 @@
+# REDUCTOR case A, outputs and reference values (Marsigny, Mirgaux & Patisson 2025,
+# Metals 15:862, Table 1, CC BY 4.0), read from the page image and checked against
+# the PDF text layer by scripts/extract_reductor_table1.py (do not edit).
+# output = 1: printed in bold (a model output); 0: plain (an input or a reported
+# flow). Units as printed.
+key,unit,value,printed,output,description
+top_gas_flow,mol/s,2796,"2796",0,top gas molar flow
+top_gas_T,degC,344,"344",1,top gas temperature
+top_gas_x_H2,%,64.1,"64.1",1,top gas H2 (molar)
+top_gas_x_H2O,%,30.9,"30.9",1,top gas H2O (molar)
+top_gas_x_N2,%,5,"5",1,top gas N2 (molar)
+dri_flow,t/h,117.19,"117.19",0,DRI mass flow
+dri_T,degC,261,"261",1,DRI temperature at the solid outlet
+dri_w_Fe2O3,%,0,"0",1,DRI Fe2O3 (mass)
+dri_w_Fe3O4,%,0.5,"0.5",1,DRI Fe3O4 (mass)
+dri_w_FeO,%,7.71,"7.71",1,DRI FeO (mass)
+dri_w_Fe,%,87.16,"87.16",1,DRI Fe (mass)
+dri_w_gangue,%,4.63,"4.63",1,DRI gangue (mass)
+metallization,%,93.3,"93.3",1,metallic Fe / total Fe
+gud,-,0.33,"0.33",1,gas utilisation degree x_H2O / (x_H2 + x_H2O) at the top
+energy_demand,GJ/t,12.2,"12.20",1,energy demand per tonne of DRI (gas loop)
+bustle_pressure,Pa,180400,"180,400",1,pressure at the bustle
+cooling_pressure,Pa,181600,"181,600",1,pressure at the cooling gas inlet

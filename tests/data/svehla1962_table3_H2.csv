@@ -1,0 +1,8 @@
+# Svehla (1962) NASA TR R-132, Table III, H2 (report p. 74 = PDF page 76), read from the page
+# image. Calculated with the same Lennard-Jones constants (sigma 2.827 A, eps/k 59.7 K) and the
+# modified Eucken correction, f_int = 1.32 (Appendix B, eq. B3). Units as printed: eta in
+# micropoise, conductivities in 1e-6 cal/(cm s K) (thermochemical calorie, 4.184 J).
+T_K,Cp_over_R,eta_uP,lambda_trans_1e6,lambda_int_1e6,lambda_1e6
+800,3.562,170.8,631.5,236.1,867.6
+1000,3.632,197.8,731.1,291.3,1022.4
+1200,3.726,222.8,823.5,355.2,1178.7

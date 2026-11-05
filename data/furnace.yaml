@@ -1,0 +1,78 @@
+# Shaft furnace reference case (Milestones 3-5): case A of Marsigny, Mirgaux & Patisson (2025),
+# "Operating Solutions to Improve the Direct Reduction of Iron Ore by Hydrogen in a Shaft
+# Furnace", Metals 15:862 (CC BY 4.0), a 100 % H2 Midrex-type furnace modelled with REDUCTOR.
+#
+# Same conventions as data/kinetics.yaml: value (SI), unit, source; `quote` + `as_written` +
+# `factor` when the number is in the PDF text layer (checked by tests/test_provenance.py).
+# Table 1 is scrambled in the text layer: its values were READ FROM THE PAGE IMAGE (page 7).
+
+geometry:
+  upper_height: {value: 15.0, unit: m, source: Marsigny2025b-S3.1, ref_file: marsigny2025_metals15_862.txt,
+                 quote: "15 m long and 2.6 m wide", as_written: "15", factor: 1.0,
+                 note: "cylindrical upper part"}
+  radius: {value: 2.6, unit: m, source: Marsigny2025b-S3.1, ref_file: marsigny2025_metals15_862.txt,
+           quote: "15 m long and 2.6 m wide", as_written: "2.6", factor: 1.0,
+           note: "'2.6 m wide' is the RADIUS: the radial axis of Fig. 2 runs 0-2.6 m, and
+                  45 kg/s over pi*2.6^2 m2 gives 2.1 kg m-2 s-1, the axial solid mass flux shown in
+                  Fig. 2 (a 2.6 m diameter would give 8.5)"}
+  bustle_height: {value: 4.9, unit: m, source: Marsigny2025b-S3.1, ref_file: marsigny2025_metals15_862.txt,
+                  quote: "4.9 m above the bottom of the upper part", as_written: "4.9", factor: 1.0,
+                  note: "height of the bustle gas inlet above the bottom of the upper part"}
+  cone_height: {value: 10.0, unit: m, source: Marsigny2025b-S3.1, ref_file: marsigny2025_metals15_862.txt,
+                quote: "conical lower part that is 10 m long and 1.31 m wide", as_written: "10", factor: 1.0,
+                note: "cooling zone, z = 0 to -10 m in Fig. 1 (Milestone 5)"}
+  outlet_radius: {value: 1.31, unit: m, source: Marsigny2025b-S3.1, ref_file: marsigny2025_metals15_862.txt,
+                  quote: "conical lower part that is 10 m long and 1.31 m wide", as_written: "1.31", factor: 1.0,
+                  note: "'wide' is a radius, as for the upper part: the solid region of Figs. 3-9 ends at
+                         R ~ 1.3 m at z = -10 m. Linear taper from 2.6 m assumed (cone)."}
+
+gas:
+  total_flow: {value: 2800.0, unit: mol/s, source: Marsigny2025b-S3.1, ref_file: marsigny2025_metals15_862.txt,
+               quote: "high gas flow (2800 mol/s)", as_written: "2800", factor: 1.0,
+               note: "bustle 2300 + cooling 500 mol/s (Table 1, image)"}
+  bustle_flow: {value: 2300.0, unit: mol/s, source: Marsigny2025b-T1-image}
+  cooling_flow: {value: 500.0, unit: mol/s, source: Marsigny2025b-T1-image}
+  x_H2: {value: 0.93, unit: "-", source: Marsigny2025b-S3.1, ref_file: marsigny2025_metals15_862.txt,
+         quote: "93% H2, 2% H2O, and 5% N2", as_written: "93", factor: 0.01}
+  x_H2O: {value: 0.02, unit: "-", source: Marsigny2025b-S3.1, ref_file: marsigny2025_metals15_862.txt,
+          quote: "93% H2, 2% H2O, and 5% N2", as_written: "2", factor: 0.01}
+  x_N2: {value: 0.05, unit: "-", source: Marsigny2025b-S3.1, ref_file: marsigny2025_metals15_862.txt,
+         quote: "93% H2, 2% H2O, and 5% N2", as_written: "5", factor: 0.01}
+  bustle_temperature: {value: 1163.15, unit: K, source: Marsigny2025b-S3.1, ref_file: marsigny2025_metals15_862.txt,
+                       quote: "at 890 C at the bustle", as_written: "890", factor: 1.0,
+                       note: "890 degC",
+                       offset: 273.15}
+  bustle_pressure: {value: 180400.0, unit: Pa, source: Marsigny2025b-T1-image,
+                    note: "a REDUCTOR output (bold in Table 1), used as a boundary value because
+                           the pressure field is not computed here"}
+  cooling_temperature: {value: 343.15, unit: K, source: Marsigny2025b-S3.1, ref_file: marsigny2025_metals15_862.txt,
+                        quote: "at 70 C at the bottom", as_written: "70", factor: 1.0, offset: 273.15,
+                        note: "70 degC, cooling gas at the solid outlet (Milestone 5)"}
+  cooling_pressure: {value: 181600.0, unit: Pa, source: Marsigny2025b-T1-image,
+                     note: "REDUCTOR output (bold in Table 1), used as a boundary value (Milestone 5)"}
+  top_pressure: {value: 150000.0, unit: Pa, source: Marsigny2025b-T1-image}
+
+solid:
+  mass_flow: {value: 45.0, unit: kg/s, source: Marsigny2025b-T1-image, note: "solid burden inlet"}
+  pellet_diameter: {value: 0.015, unit: m, source: Marsigny2025b-S2.1.1, ref_file: marsigny2025_metals15_862.txt,
+                    quote: "(dp = 15 mm)", as_written: "15", factor: 1.0e-3}
+  bed_porosity: {value: 0.5, unit: "-", source: Marsigny2025b-S2.1.1, ref_file: marsigny2025_metals15_862.txt,
+                 quote: "bed = 0.5", as_written: "0.5", factor: 1.0}
+  w_Fe2O3: {value: 0.9665, unit: "-", source: Marsigny2025b-S3.1, ref_file: marsigny2025_metals15_862.txt,
+            quote: "hematitic ore (96.65 wt-%)", as_written: "96.65", factor: 0.01}
+  # Pellet density, porosity, specific area and structure are NOT given for these pellets; the
+  # Vale pellet values of data/kinetics.yaml (same group, same kinetic model) are used.
+
+gangue:   # mass fractions of the whole burden; sum 3.35 wt-% (Marsigny 2025b, Sec. 3.1)
+  CaO: {value: 0.0139, unit: "-", source: Marsigny2025b-S3.1, ref_file: marsigny2025_metals15_862.txt,
+        quote: "of which CaO 1.39%, SiO2 0.98%, MgO 0.56%, Al2O3 0.42%", as_written: "1.39", factor: 0.01}
+  SiO2: {value: 0.0098, unit: "-", source: Marsigny2025b-S3.1, ref_file: marsigny2025_metals15_862.txt,
+         quote: "of which CaO 1.39%, SiO2 0.98%, MgO 0.56%, Al2O3 0.42%", as_written: "0.98", factor: 0.01}
+  MgO: {value: 0.0056, unit: "-", source: Marsigny2025b-S3.1, ref_file: marsigny2025_metals15_862.txt,
+        quote: "of which CaO 1.39%, SiO2 0.98%, MgO 0.56%, Al2O3 0.42%", as_written: "0.56", factor: 0.01}
+  Al2O3: {value: 0.0042, unit: "-", source: Marsigny2025b-S3.1, ref_file: marsigny2025_metals15_862.txt,
+          quote: "of which CaO 1.39%, SiO2 0.98%, MgO 0.56%, Al2O3 0.42%", as_written: "0.42", factor: 0.01}
+
+solid_inlet:
+  temperature: {value: 293.15, unit: K, source: Marsigny2025b-T1-image, note: "20 degC (Table 1, case A)"}
+

@@ -1,0 +1,52 @@
+# Gas transport properties (Milestone 2).
+#
+# Lennard-Jones 12-6 force constants for Chapman-Enskog diffusivities and viscosities.
+# Source: Svehla (1962) NASA TR R-132, Table I(a), pp. 22-23 (scanned report; values READ FROM
+# THE PAGE IMAGE because the OCR text layer misaligns the eps/k column). Cross-checked in
+# tests/test_transport.py against the independent experimental correlations of Marrero &
+# Mason (1972) for H2-He and H2-N2.
+# Collision integrals: data/collision_integrals.csv (Cantera / Monchick & Mason 1961).
+
+lennard_jones:
+  H2:  {sigma: 2.827e-10, eps_over_k: 59.7,  unit: "sigma m, eps/k K", source: Svehla1962-TI, page: 22}
+  H2O: {sigma: 2.641e-10, eps_over_k: 809.1, unit: "sigma m, eps/k K", source: Svehla1962-TI, page: 22,
+        note: "polar molecule treated with the non-polar 12-6 potential (as in Svehla)"}
+  He:  {sigma: 2.551e-10, eps_over_k: 10.22, unit: "sigma m, eps/k K", source: Svehla1962-TI, page: 22}
+  N2:  {sigma: 3.798e-10, eps_over_k: 71.4,  unit: "sigma m, eps/k K", source: Svehla1962-TI, page: 23}
+
+# External mass transfer to a single sphere, Ranz & Marshall (1952):
+#   Sh = a + b Re^m Sc^n.  Constants as given in Marsigny (2025) PhD thesis, eq. (12), p. 34
+#   (read from the page image; the text layer loses the exponents).
+ranz_marshall:
+  a: 2.0
+  b: 0.6
+  m: 0.5
+  n: 0.3333333333333333
+  source: Marsigny2025-thesis-eq12
+
+# Reference state of "normal" gas volumes (Nm3, Nlpm): 0 degC and 1 atm (definition).
+normal_conditions:
+  temperature: 273.15
+  pressure: 101325.0
+
+# Experimental correlations for binary diffusivities, preferred over Chapman-Enskog where
+# available (Chapman-Enskog with the force constants above under-predicts them by 5-14 % at
+# 1000-1500 K, see docs/validation.md). Marrero & Mason (1972) J. Phys. Chem. Ref. Data 1:3,
+# Table 12 (journal p. 35), eq. (4.3-1):
+#   ln(p D12) = ln A + s ln T - ln[ln(phi0/kT)]^2 - S/T - S'/T^2,  p D12 in atm cm2/s.
+# Read from the scanned page image (PDF page 34). A_1e3 = 10^3 A; phi0_k_1e8 = 10^-8 phi0/k [K].
+# Uncertainty (their Fig. 4): group I +-5 %, group II +-7 % at 1000 K.
+marrero_mason:
+  He-H2: {A_1e3: 27.0, s: 1.510, phi0_k_1e8: 0.0534, S: 0.0, S2: 0.0, T_min: 90.0, T_max: 10000.0, group: II}
+  H2-N2: {A_1e3: 15.39, s: 1.548, phi0_k_1e8: 0.316, S: -2.80, S2: 1067.0, T_min: 65.0, T_max: 10000.0, group: I}
+
+# Gas-solid transfer in a packed bed, Wakao & Kaguei (1982), as given by Wagner (2008, PhD thesis,
+# Sec. III.5.3, p. 89): Nu = 2 + 1.1 Pr^(1/3) Re^0.6 (text layer: "Nu = 2 + 1,1Pr1 3 Re0,6").
+# Mass transfer by the heat/mass analogy: Sh = 2 + 1.1 Sc^(1/3) Re^0.6, with Re based on the
+# pellet diameter and the superficial gas velocity.
+wakao_kaguei:
+  a: 2.0
+  b: 1.1
+  m: 0.6
+  n: 0.3333333333333333
+  source: Wagner2008-III.5.3

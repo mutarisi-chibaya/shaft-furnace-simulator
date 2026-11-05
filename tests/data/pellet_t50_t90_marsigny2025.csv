@@ -1,0 +1,7 @@
+# Marsigny et al. (2025) Metals 15:1034, Section 2.2 (text): repeatability of 5 identical TG96
+# runs at 900 degC, base case (Table 3). quote: "for a series of 5 identical runs at 900 C with
+# TG96, the times to reach 50% of conversion were 6.03 +- 0.55 min and to 90% of conversion
+# 16.86 +- 1.19 min"
+temperature_C,conversion,time_min,std_min,n_runs
+900,0.5,6.03,0.55,5
+900,0.9,16.86,1.19,5

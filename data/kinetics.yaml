@@ -1,0 +1,92 @@
+# Single-pellet kinetic model parameters (Milestone 2).
+#
+# Model: grainy pellet model with the law of additive reaction times (GM-LART), as in
+# Marsigny, Letz, Mirgaux & Patisson (2025), Metals 15:1034, Table A1 ("MGPM").
+#
+# Every entry gives:  value (SI), unit, source key (data/SOURCES.md), and, where the source
+# has a text layer, a verbatim `quote` plus the number `as_written` in it and a `factor`
+# such that value = number(as_written) * factor. tests/test_provenance.py checks that the
+# quote occurs in references/<ref_file> (download with scripts/fetch_references.py).
+# Number parsing: ", " is a thousands separator (e.g. "30, 584"), "," alone a French
+# decimal comma (e.g. "0,53").
+
+kinetic_triplets:   # k_j = k0_j exp(-Ea_j / (R T)); Marsigny 2025, Table 2 (fit to TGA, 600-900 degC)
+  k0_1: {value: 8.89e-4, unit: m/s, source: Marsigny2025-T2, ref_file: marsigny2025_metals15_1034.txt,
+         quote: "k0,1 = 8.89", as_written: "8.89", factor: 1.0e-4,
+         note: "printed as 8.89 x 10^-4 m s-1; the exponent is lost in the PDF text layer"}
+  Ea_1: {value: 30584.0, unit: J/mol, source: Marsigny2025-T2, ref_file: marsigny2025_metals15_1034.txt,
+         quote: "Ea,1 = 30, 584 J mol-1", as_written: "30, 584", factor: 1.0}
+  k0_2: {value: 0.165, unit: m/s, source: Marsigny2025-T2, ref_file: marsigny2025_metals15_1034.txt,
+         quote: "k0,2 = 0.165 m s-1", as_written: "0.165", factor: 1.0}
+  Ea_2: {value: 80721.0, unit: J/mol, source: Marsigny2025-T2, ref_file: marsigny2025_metals15_1034.txt,
+         quote: "Ea,2 = 80, 721 J mol-1", as_written: "80, 721", factor: 1.0}
+  k0_3: {value: 2.29, unit: m/s, source: Marsigny2025-T2, ref_file: marsigny2025_metals15_1034.txt,
+         quote: "k0,3 = 2.29 m s-1", as_written: "2.29", factor: 1.0}
+  Ea_3: {value: 115864.0, unit: J/mol, source: Marsigny2025-T2, ref_file: marsigny2025_metals15_1034.txt,
+         quote: "Ea,3 = 115, 864 J mol-1", as_written: "115, 864", factor: 1.0}
+
+pellet:   # Vale DR-grade pellet, base case of Marsigny 2025, Table 3 and Section 2.1
+  diameter: {value: 0.01282, unit: m, source: Marsigny2025-T3, ref_file: marsigny2025_metals15_1034.txt,
+             quote: "0.01282 0.963 0.037 3630 60.4", as_written: "0.01282", factor: 1.0}
+  w_Fe2O3: {value: 0.963, unit: "-", source: Marsigny2025-T3, ref_file: marsigny2025_metals15_1034.txt,
+            quote: "0.01282 0.963 0.037 3630 60.4", as_written: "0.963", factor: 1.0}
+  w_inert: {value: 0.037, unit: "-", source: Marsigny2025-T3, ref_file: marsigny2025_metals15_1034.txt,
+            quote: "0.01282 0.963 0.037 3630 60.4", as_written: "0.037", factor: 1.0}
+  density: {value: 3630.0, unit: kg/m3, source: Marsigny2025-T3, ref_file: marsigny2025_metals15_1034.txt,
+            quote: "0.01282 0.963 0.037 3630 60.4", as_written: "3630", factor: 1.0,
+            note: "initial apparent mass density of the pellet"}
+  specific_area: {value: 60.4, unit: m2/kg, source: Marsigny2025-T3, ref_file: marsigny2025_metals15_1034.txt,
+                  quote: "0.01282 0.963 0.037 3630 60.4", as_written: "60.4", factor: 1.0,
+                  note: "initial specific surface area (krypton adsorption)"}
+  porosity: {value: 0.295, unit: "-", source: Marsigny2025-S2.1, ref_file: marsigny2025_metals15_1034.txt,
+             quote: "= 0.295", as_written: "0.295", factor: 1.0,
+             note: "initial porosity, mercury intrusion"}
+  tortuosity: {value: 2.0, unit: "-", source: Marsigny2025-S3.5.3, ref_file: marsigny2025_metals15_1034.txt,
+               quote: "we chose a moderate value of 2 in this work", as_written: "2", factor: 1.0}
+
+structure:   # Grain/crystallite structure NOT given by Marsigny 2025; taken from the group's
+             # earlier model (Wagner 2008, PhD thesis, Section II.4.2), assumed unchanged.
+  d_pores_intergrain: {value: 1.0e-5, unit: m, source: Wagner2008-II.4.2, ref_file: wagner2008_thesis.txt,
+                       quote: "dpores,intergran = 10", as_written: "10", factor: 1.0e-6,
+                       note: "10 micrometre (the micro sign is lost in the text layer)"}
+  d_crystallite: {value: 2.0e-6, unit: m, source: Wagner2008-II.4.2, ref_file: wagner2008_thesis.txt,
+                  quote: "dcrist,w = 2", as_written: "2", factor: 1.0e-6,
+                  note: "dense wustite crystallites, 2 micrometre"}
+  d_pores_crystallite: {value: 1.0e-7, unit: m, source: Wagner2008-II.4.2, ref_file: wagner2008_thesis.txt,
+                        quote: "dpores,crist,w = 0,1", as_written: "0,1", factor: 1.0e-6,
+                        note: "pores between crystallites inside wustite grains, 0.1 micrometre"}
+  porosity_wustite_grain: {value: 0.53, unit: "-", source: Wagner2008-II.4.2, ref_file: wagner2008_thesis.txt,
+                           quote: "grains,w = 0,53", as_written: "0,53", factor: 1.0}
+
+true_density:   # theoretical (crystal) mass densities; Wagner 2008, Tableau 2 (COACH/THERMODATA)
+  Fe2O3: {value: 5275.0, unit: kg/m3, source: Wagner2008-T2, ref_file: wagner2008_thesis.txt,
+          quote: "5275 5200 5867 7874", as_written: "5275", factor: 1.0}
+  Fe3O4: {value: 5200.0, unit: kg/m3, source: Wagner2008-T2, ref_file: wagner2008_thesis.txt,
+          quote: "5275 5200 5867 7874", as_written: "5200", factor: 1.0}
+  Fe0.95O: {value: 5867.0, unit: kg/m3, source: Wagner2008-T2, ref_file: wagner2008_thesis.txt,
+            quote: "5275 5200 5867 7874", as_written: "5867", factor: 1.0}
+  Fe: {value: 7874.0, unit: kg/m3, source: Wagner2008-T2, ref_file: wagner2008_thesis.txt,
+       quote: "5275 5200 5867 7874", as_written: "7874", factor: 1.0}
+
+molar_mass:   # Wagner 2008, Tableau 2 (consistent with the oxide stoichiometry of the model)
+  Fe2O3: {value: 0.15969, unit: kg/mol, source: Wagner2008-T2, ref_file: wagner2008_thesis.txt,
+          quote: "159,69 231,53 69,05 55,84", as_written: "159,69", factor: 1.0e-3}
+  Fe3O4: {value: 0.23153, unit: kg/mol, source: Wagner2008-T2, ref_file: wagner2008_thesis.txt,
+          quote: "159,69 231,53 69,05 55,84", as_written: "231,53", factor: 1.0e-3}
+  Fe0.95O: {value: 0.06905, unit: kg/mol, source: Wagner2008-T2, ref_file: wagner2008_thesis.txt,
+            quote: "159,69 231,53 69,05 55,84", as_written: "69,05", factor: 1.0e-3}
+  Fe: {value: 0.05584, unit: kg/mol, source: Wagner2008-T2, ref_file: wagner2008_thesis.txt,
+       quote: "159,69 231,53 69,05 55,84", as_written: "55,84", factor: 1.0e-3}
+
+tga_base_case:   # Operating conditions of the TG96 experiments; Marsigny 2025, Table 3
+  gas_flow_normal: {value: 3.0e-5, unit: m3(STP)/s, source: Marsigny2025-T3, ref_file: marsigny2025_metals15_1034.txt,
+                    quote: "1.8 Nlpm = 3", as_written: "3", factor: 1.0e-5,
+                    note: "1.8 Nlpm = 3 x 10^-5 m3STP s-1 (footnote of Table 3)"}
+  x_H2: {value: 0.55, unit: "-", source: Marsigny2025-T3, ref_file: marsigny2025_metals15_1034.txt,
+         quote: "1.8 0.55 0.45", as_written: "0.55", factor: 1.0}
+  x_He: {value: 0.45, unit: "-", source: Marsigny2025-T3, ref_file: marsigny2025_metals15_1034.txt,
+         quote: "1.8 0.55 0.45", as_written: "0.45", factor: 1.0}
+  pressure: {value: 1.0e5, unit: Pa, source: Marsigny2025-T3, ref_file: marsigny2025_metals15_1034.txt,
+             quote: "P (bar) d f urnace (m) Pellet properties 1 0.02", as_written: "1", factor: 1.0e5}
+  furnace_diameter: {value: 0.02, unit: m, source: Marsigny2025-T3, ref_file: marsigny2025_metals15_1034.txt,
+                     quote: "P (bar) d f urnace (m) Pellet properties 1 0.02", as_written: "0.02", factor: 1.0}
