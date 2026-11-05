@@ -1,0 +1,176 @@
+# REDUCTOR cases A-E, inputs and outputs (Marsigny, Mirgaux & Patisson 2025, Metals
+# 15:862, Table 1, CC BY 4.0), read from the page image and checked against the PDF
+# text layer by scripts/extract_reductor_cases.py (do not edit).
+# output = 1: printed in bold (a model output); 0: plain (an input or a reported
+# flow). Units as printed.
+case,key,unit,value,printed,output,description
+A,bustle_flow,mol/s,2300,"2300",0,bustle gas molar flow
+A,bustle_T,degC,890,"890",0,bustle gas temperature
+A,bustle_x_H2,%,93,"93",0,bustle gas H2 (molar)
+A,bustle_x_H2O,%,2,"2",0,bustle gas H2O (molar)
+A,bustle_x_N2,%,5,"5",0,bustle gas N2 (molar)
+A,bustle_pressure,Pa,180400,"180,400",1,pressure at the bustle
+A,cooling_flow,mol/s,500,"500",0,cooling gas molar flow
+A,cooling_T,degC,70,"70",0,cooling gas temperature
+A,cooling_x_H2,%,93,"93",0,cooling gas H2 (molar)
+A,cooling_x_H2O,%,2,"2",0,cooling gas H2O (molar)
+A,cooling_x_N2,%,5,"5",0,cooling gas N2 (molar)
+A,cooling_pressure,Pa,181600,"181,600",1,pressure at the cooling gas inlet
+A,solid_flow,kg/s,45,"45",0,solid burden inlet mass flow
+A,solid_T,degC,20,"20",0,solid burden inlet temperature
+A,solid_w_Fe2O3,%,96.65,"96.65",0,burden Fe2O3 (mass)
+A,solid_w_gangue,%,3.35,"3.35",0,burden gangue (mass)
+A,pellet_diameter,mm,15,"15",0,pellet diameter
+A,bed_porosity,-,0.5,"0.5",0,bed porosity
+A,top_gas_flow,mol/s,2796,"2796",0,top gas molar flow
+A,top_gas_T,degC,344,"344",1,top gas temperature
+A,top_gas_x_H2,%,64.1,"64.1",1,top gas H2 (molar)
+A,top_gas_x_H2O,%,30.9,"30.9",1,top gas H2O (molar)
+A,top_gas_x_N2,%,5,"5",1,top gas N2 (molar)
+A,top_pressure,Pa,150000,"150,000",0,top gas pressure
+A,dri_flow,t/h,117.19,"117.19",0,DRI mass flow
+A,dri_T,degC,261,"261",1,DRI temperature at the solid outlet
+A,dri_w_Fe2O3,%,0,"0",1,DRI Fe2O3 (mass)
+A,dri_w_Fe3O4,%,0.5,"0.5",1,DRI Fe3O4 (mass)
+A,dri_w_FeO,%,7.71,"7.71",1,DRI FeO (mass)
+A,dri_w_Fe,%,87.16,"87.16",1,DRI Fe (mass)
+A,dri_w_gangue,%,4.63,"4.63",1,DRI gangue (mass)
+A,metallization,%,93.3,"93.3",1,metallic Fe / total Fe
+A,gud,-,0.33,"0.33",1,gas utilisation degree x_H2O / (x_H2 + x_H2O) at the top
+A,energy_demand,GJ/t,12.2,"12.20",1,energy demand per tonne of DRI (gas loop)
+B,bustle_flow,mol/s,2100,"2100",0,bustle gas molar flow
+B,bustle_T,degC,890,"890",0,bustle gas temperature
+B,bustle_x_H2,%,93,"93",0,bustle gas H2 (molar)
+B,bustle_x_H2O,%,2,"2",0,bustle gas H2O (molar)
+B,bustle_x_N2,%,5,"5",0,bustle gas N2 (molar)
+B,bustle_pressure,Pa,179600,"179,600",1,pressure at the bustle
+B,cooling_flow,mol/s,700,"700",0,cooling gas molar flow
+B,cooling_T,degC,70,"70",0,cooling gas temperature
+B,cooling_x_H2,%,93,"93",0,cooling gas H2 (molar)
+B,cooling_x_H2O,%,2,"2",0,cooling gas H2O (molar)
+B,cooling_x_N2,%,5,"5",0,cooling gas N2 (molar)
+B,cooling_pressure,Pa,181900,"181,900",1,pressure at the cooling gas inlet
+B,solid_flow,kg/s,45,"45",0,solid burden inlet mass flow
+B,solid_T,degC,20,"20",0,solid burden inlet temperature
+B,solid_w_Fe2O3,%,96.65,"96.65",0,burden Fe2O3 (mass)
+B,solid_w_gangue,%,3.35,"3.35",0,burden gangue (mass)
+B,pellet_diameter,mm,15,"15",0,pellet diameter
+B,bed_porosity,-,0.5,"0.5",0,bed porosity
+B,top_gas_flow,mol/s,2800,"2800",0,top gas molar flow
+B,top_gas_T,degC,341,"341",1,top gas temperature
+B,top_gas_x_H2,%,65.1,"65.1",1,top gas H2 (molar)
+B,top_gas_x_H2O,%,29.9,"29.9",1,top gas H2O (molar)
+B,top_gas_x_N2,%,5,"5",1,top gas N2 (molar)
+B,top_pressure,Pa,150000,"150,000",0,top gas pressure
+B,dri_flow,t/h,117.22,"117.22",0,DRI mass flow
+B,dri_T,degC,166,"166",1,DRI temperature at the solid outlet
+B,dri_w_Fe2O3,%,0,"0",1,DRI Fe2O3 (mass)
+B,dri_w_Fe3O4,%,2.82,"2.82",1,DRI Fe3O4 (mass)
+B,dri_w_FeO,%,5.04,"5.04",1,DRI FeO (mass)
+B,dri_w_Fe,%,87.51,"87.51",1,DRI Fe (mass)
+B,dri_w_gangue,%,4.63,"4.63",1,DRI gangue (mass)
+B,metallization,%,93.7,"93.7",1,metallic Fe / total Fe
+B,gud,-,0.33,"0.33",1,gas utilisation degree x_H2O / (x_H2 + x_H2O) at the top
+B,energy_demand,GJ/t,11.99,"11.99",1,energy demand per tonne of DRI (gas loop)
+C,bustle_flow,mol/s,2300,"2300",0,bustle gas molar flow
+C,bustle_T,degC,950,"950",0,bustle gas temperature
+C,bustle_x_H2,%,66,"66",0,bustle gas H2 (molar)
+C,bustle_x_H2O,%,2,"2",0,bustle gas H2O (molar)
+C,bustle_x_N2,%,32,"32",0,bustle gas N2 (molar)
+C,bustle_pressure,Pa,212400,"212,400",1,pressure at the bustle
+C,cooling_flow,mol/s,500,"500",0,cooling gas molar flow
+C,cooling_T,degC,70,"70",0,cooling gas temperature
+C,cooling_x_H2,%,66,"66",0,cooling gas H2 (molar)
+C,cooling_x_H2O,%,2,"2",0,cooling gas H2O (molar)
+C,cooling_x_N2,%,32,"32",0,cooling gas N2 (molar)
+C,cooling_pressure,Pa,215500,"215,500",1,pressure at the cooling gas inlet
+C,solid_flow,kg/s,45,"45",0,solid burden inlet mass flow
+C,solid_T,degC,20,"20",0,solid burden inlet temperature
+C,solid_w_Fe2O3,%,96.65,"96.65",0,burden Fe2O3 (mass)
+C,solid_w_gangue,%,3.35,"3.35",0,burden gangue (mass)
+C,pellet_diameter,mm,15,"15",0,pellet diameter
+C,bed_porosity,-,0.5,"0.5",0,bed porosity
+C,top_gas_flow,mol/s,2793,"2793",0,top gas molar flow
+C,top_gas_T,degC,394,"394",1,top gas temperature
+C,top_gas_x_H2,%,36.1,"36.1",1,top gas H2 (molar)
+C,top_gas_x_H2O,%,31.9,"31.9",1,top gas H2O (molar)
+C,top_gas_x_N2,%,32,"32",1,top gas N2 (molar)
+C,top_pressure,Pa,150000,"150,000",0,top gas pressure
+C,dri_flow,t/h,117.18,"117.18",0,DRI mass flow
+C,dri_T,degC,402,"402",1,DRI temperature at the solid outlet
+C,dri_w_Fe2O3,%,0,"0",1,DRI Fe2O3 (mass)
+C,dri_w_Fe3O4,%,0,"0",1,DRI Fe3O4 (mass)
+C,dri_w_FeO,%,8.26,"8.26",1,DRI FeO (mass)
+C,dri_w_Fe,%,87.11,"87.11",1,DRI Fe (mass)
+C,dri_w_gangue,%,4.63,"4.63",1,DRI gangue (mass)
+C,metallization,%,93.2,"93.2",1,metallic Fe / total Fe
+C,gud,-,0.47,"0.47",1,gas utilisation degree x_H2O / (x_H2 + x_H2O) at the top
+C,energy_demand,GJ/t,12.47,"12.47",1,energy demand per tonne of DRI (gas loop)
+D,bustle_flow,mol/s,2300,"2300",0,bustle gas molar flow
+D,bustle_T,degC,815,"815",0,bustle gas temperature
+D,bustle_x_H2,%,93,"93",0,bustle gas H2 (molar)
+D,bustle_x_H2O,%,2,"2",0,bustle gas H2O (molar)
+D,bustle_x_N2,%,5,"5",0,bustle gas N2 (molar)
+D,bustle_pressure,Pa,178900,"178,900",1,pressure at the bustle
+D,cooling_flow,mol/s,500,"500",0,cooling gas molar flow
+D,cooling_T,degC,70,"70",0,cooling gas temperature
+D,cooling_x_H2,%,93,"93",0,cooling gas H2 (molar)
+D,cooling_x_H2O,%,2,"2",0,cooling gas H2O (molar)
+D,cooling_x_N2,%,5,"5",0,cooling gas N2 (molar)
+D,cooling_pressure,Pa,180800,"180,800",1,pressure at the cooling gas inlet
+D,solid_flow,kg/s,45,"45",0,solid burden inlet mass flow
+D,solid_T,degC,1200,"1200",0,solid burden inlet temperature
+D,solid_w_Fe2O3,%,96.65,"96.65",0,burden Fe2O3 (mass)
+D,solid_w_gangue,%,3.35,"3.35",0,burden gangue (mass)
+D,pellet_diameter,mm,15,"15",0,pellet diameter
+D,bed_porosity,-,0.5,"0.5",0,bed porosity
+D,top_gas_flow,mol/s,2802,"2802",0,top gas molar flow
+D,top_gas_T,degC,806,"806",1,top gas temperature
+D,top_gas_x_H2,%,62.9,"62.9",1,top gas H2 (molar)
+D,top_gas_x_H2O,%,32.1,"32.1",1,top gas H2O (molar)
+D,top_gas_x_N2,%,5,"5",1,top gas N2 (molar)
+D,top_pressure,Pa,150000,"150,000",0,top gas pressure
+D,dri_flow,t/h,116.86,"116.86",0,DRI mass flow
+D,dri_T,degC,330,"330",1,DRI temperature at the solid outlet
+D,dri_w_Fe2O3,%,0,"0",1,DRI Fe2O3 (mass)
+D,dri_w_Fe3O4,%,0,"0",1,DRI Fe3O4 (mass)
+D,dri_w_FeO,%,7.11,"7.11",1,DRI FeO (mass)
+D,dri_w_Fe,%,88.24,"88.24",1,DRI Fe (mass)
+D,dri_w_gangue,%,4.64,"4.64",1,DRI gangue (mass)
+D,metallization,%,94.1,"94.1",1,metallic Fe / total Fe
+D,gud,-,0.34,"0.34",1,gas utilisation degree x_H2O / (x_H2 + x_H2O) at the top
+D,energy_demand,GJ/t,11.68,"11.68",1,energy demand per tonne of DRI (gas loop)
+E,bustle_flow,mol/s,2300,"2300",0,bustle gas molar flow
+E,bustle_T,degC,890,"890",0,bustle gas temperature
+E,bustle_x_H2,%,93,"93",0,bustle gas H2 (molar)
+E,bustle_x_H2O,%,2,"2",0,bustle gas H2O (molar)
+E,bustle_x_N2,%,5,"5",0,bustle gas N2 (molar)
+E,bustle_pressure,Pa,176700,"176,700",1,pressure at the bustle
+E,cooling_flow,mol/s,500,"500",0,cooling gas molar flow
+E,cooling_T,degC,70,"70",0,cooling gas temperature
+E,cooling_x_H2,%,93,"93",0,cooling gas H2 (molar)
+E,cooling_x_H2O,%,2,"2",0,cooling gas H2O (molar)
+E,cooling_x_N2,%,5,"5",0,cooling gas N2 (molar)
+E,cooling_pressure,Pa,178200,"178,200",1,pressure at the cooling gas inlet
+E,solid_flow,kg/s,43,"43",0,solid burden inlet mass flow
+E,solid_T,degC,20,"20",0,solid burden inlet temperature
+E,solid_w_Fe2O3,%,96.65,"96.65",0,burden Fe2O3 (mass)
+E,solid_w_gangue,%,3.35,"3.35",0,burden gangue (mass)
+E,pellet_diameter,mm,15,"15",0,pellet diameter
+E,bed_porosity,-,0.5,"0.5",0,bed porosity
+E,top_gas_flow,mol/s,2766,"2766",0,top gas molar flow
+E,top_gas_T,degC,353,"353",1,top gas temperature
+E,top_gas_x_H2,%,64.6,"64.6",1,top gas H2 (molar)
+E,top_gas_x_H2O,%,30.4,"30.4",1,top gas H2O (molar)
+E,top_gas_x_N2,%,5,"5",1,top gas N2 (molar)
+E,top_pressure,Pa,150000,"150,000",0,top gas pressure
+E,dri_flow,t/h,109.88,"109.88",0,DRI mass flow
+E,dri_T,degC,403,"403",1,DRI temperature at the solid outlet
+E,dri_w_Fe2O3,%,0,"0",1,DRI Fe2O3 (mass)
+E,dri_w_Fe3O4,%,0,"0",1,DRI Fe3O4 (mass)
+E,dri_w_FeO,%,0,"0",1,DRI FeO (mass)
+E,dri_w_Fe,%,95.15,"95.15",1,DRI Fe (mass)
+E,dri_w_gangue,%,4.85,"4.85",1,DRI gangue (mass)
+E,metallization,%,100,"100",1,metallic Fe / total Fe
+E,gud,-,0.32,"0.32",1,gas utilisation degree x_H2O / (x_H2 + x_H2O) at the top
+E,energy_demand,GJ/t,12.98,"12.98",1,energy demand per tonne of DRI (gas loop)

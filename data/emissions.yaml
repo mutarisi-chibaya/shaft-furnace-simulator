@@ -1,0 +1,52 @@
+# Energy and CO2 parameters of Milestone 7 (electricity demand and CO2 per tonne of DRI).
+#
+# Same conventions as data/kinetics.yaml: value (SI), unit, source (key in data/SOURCES.md);
+# `quote` + `as_written` + `factor` (+ `offset`) when the number is in the PDF text layer
+# (checked by tests/test_provenance.py). Grid intensities are in data/grid_intensity.yaml
+# (generated from Ember by scripts/fetch_grid_intensity.py).
+#
+# Scope (docs/validation.md, Milestone 7): the electricity for water electrolysis (fresh H2
+# = the H2 consumed in the furnace) and for heating the bustle gas, as in the gas-loop model
+# of Marsigny et al. (2025b). Gas compression, the heat exchanger of that gas loop, pellet
+# making, the EAF and upstream emissions of plant and equipment are not included.
+
+electrolysis:
+  specific_energy: {value: 18.0e6, unit: J/Nm3, source: Marsigny2025b-S2.2, ref_file: marsigny2025_metals15_862.txt,
+                    quote: "considering the need for 18 MJ/Nm3H2", as_written: "18", factor: 1.0e6,
+                    note: "electricity per normal cubic metre of H2; the same value as in the
+                           energy demand of Table 1"}
+
+normal_conditions:
+  # Definition of the normal cubic metre (Nm3): 0 degC and 101.325 kPa (DIN 1343). A
+  # convention, not a physical parameter; with the ideal gas law it gives 44.6 mol/Nm3.
+  temperature: {value: 273.15, unit: K, source: DIN1343-normal-state}
+  pressure: {value: 101325.0, unit: Pa, source: DIN1343-normal-state}
+
+gas_heating:
+  heater_efficiency: {value: 0.7, unit: "-", source: Marsigny2025b-S2.2, ref_file: marsigny2025_metals15_862.txt,
+                      quote: "The efficiency of the heater was taken equal to 0.7", as_written: "0.7", factor: 1.0,
+                      note: "electric heater assumed (the paper does not name the heat source)"}
+  recycle_temperature: {value: 343.15, unit: K, source: Marsigny2025b-S2.2, ref_file: marsigny2025_metals15_862.txt,
+                        quote: "exits the condenser at a temperature of 70", as_written: "70", factor: 1.0,
+                        offset: 273.15,
+                        note: "gas leaving the condenser of the gas loop, from which the bustle gas is
+                               heated (no heat recovery counted here, see docs)"}
+
+benchmarks:
+  # For orientation on the CO2 figure only. Different system boundaries (see notes).
+  ng_dri_direct_55_45: {value: 0.45, unit: kg/kg, source: Marsigny2025-thesis-T20, ref_file: thesis2025_h2rich.txt,
+                        quote: "Direct carbon emissions (tCO2/tDRI) 0 0.29 0.45", as_written: "0.45", factor: 1.0,
+                        note: "shaft furnace on reformed natural gas, H2:CO = 55:45 (Midrex-type gas);
+                               direct process emissions per tonne of DRI, excluding electricity and
+                               upstream natural-gas emissions"}
+  ng_dri_direct_80_20: {value: 0.29, unit: kg/kg, source: Marsigny2025-thesis-T20, ref_file: thesis2025_h2rich.txt,
+                        quote: "Direct carbon emissions (tCO2/tDRI) 0 0.29 0.45", as_written: "0.29", factor: 1.0,
+                        note: "as above with H2:CO = 80:20 (H2-enriched)"}
+  bf_bof_crude_steel: {value: 2.2, unit: kg/kg, source: Marsigny2025-thesis-IEA2020, ref_file: thesis2025_h2rich.txt,
+                       quote: "reach 2.2 tCO2/tcrude steel for the BF-BOF route and 1.4 tCO2/tcrude steel for the DRSF-EAF",
+                       as_written: "2.2", factor: 1.0,
+                       note: "per tonne of CRUDE STEEL (IEA 2020, cited in the thesis), not per tonne of DRI"}
+  ng_dri_eaf_crude_steel: {value: 1.4, unit: kg/kg, source: Marsigny2025-thesis-IEA2020, ref_file: thesis2025_h2rich.txt,
+                           quote: "reach 2.2 tCO2/tcrude steel for the BF-BOF route and 1.4 tCO2/tcrude steel for the DRSF-EAF",
+                           as_written: "1.4", factor: 1.0,
+                           note: "per tonne of CRUDE STEEL, natural-gas DRI + EAF (IEA 2020, cited in the thesis)"}

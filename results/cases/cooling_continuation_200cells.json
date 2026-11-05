@@ -1,0 +1,262 @@
+[
+ {
+  "direction": "up",
+  "cooling_flow": 500.0,
+  "converged": true,
+  "outer_iterations": 23,
+  "metallization": 0.9237149746125657,
+  "dri_T_C": 291.01537727536675,
+  "top_gas_T_C": 360.917958419456,
+  "seconds": 113.01594700000715
+ },
+ {
+  "direction": "up",
+  "cooling_flow": 525.0,
+  "converged": true,
+  "outer_iterations": 23,
+  "metallization": 0.9317396150081994,
+  "dri_T_C": 251.37569752706838,
+  "top_gas_T_C": 361.51891686766055,
+  "seconds": 63.25318350002635
+ },
+ {
+  "direction": "up",
+  "cooling_flow": 550.0,
+  "converged": true,
+  "outer_iterations": 24,
+  "metallization": 0.9397183595065138,
+  "dri_T_C": 210.17429754851634,
+  "top_gas_T_C": 362.11697455499393,
+  "seconds": 56.472910700016655
+ },
+ {
+  "direction": "up",
+  "cooling_flow": 575.0,
+  "converged": true,
+  "outer_iterations": 27,
+  "metallization": 0.9476671421171367,
+  "dri_T_C": 167.22449764072883,
+  "top_gas_T_C": 362.7116326432614,
+  "seconds": 58.26538460003212
+ },
+ {
+  "direction": "up",
+  "cooling_flow": 600.0,
+  "converged": true,
+  "outer_iterations": 34,
+  "metallization": 0.9555914208194379,
+  "dri_T_C": 122.3215103302947,
+  "top_gas_T_C": 363.29769074106787,
+  "seconds": 58.86387210001703
+ },
+ {
+  "direction": "up",
+  "cooling_flow": 625.0,
+  "converged": false,
+  "outer_iterations": 150,
+  "metallization": 1.0,
+  "dri_T_C": 264.34454090894087,
+  "top_gas_T_C": 324.9258401747861,
+  "seconds": 123.28415380005026
+ },
+ {
+  "direction": "up",
+  "cooling_flow": 650.0,
+  "converged": false,
+  "outer_iterations": 150,
+  "metallization": 1.0,
+  "dri_T_C": 69.96709518260946,
+  "top_gas_T_C": 351.92628951692416,
+  "seconds": 110.75361330003943
+ },
+ {
+  "direction": "up",
+  "cooling_flow": 675.0,
+  "converged": false,
+  "outer_iterations": 150,
+  "metallization": 0.9143991693506136,
+  "dri_T_C": 91.70319625689774,
+  "top_gas_T_C": 354.8795999787691,
+  "seconds": 99.91132419998758
+ },
+ {
+  "direction": "up",
+  "cooling_flow": 700.0,
+  "converged": false,
+  "outer_iterations": 150,
+  "metallization": 1.0,
+  "dri_T_C": 137.3561996301978,
+  "top_gas_T_C": 326.23880815405516,
+  "seconds": 140.60353389999364
+ },
+ {
+  "direction": "up",
+  "cooling_flow": 725.0,
+  "converged": false,
+  "outer_iterations": 150,
+  "metallization": 0.6748078024653287,
+  "dri_T_C": 188.95271608868308,
+  "top_gas_T_C": 359.27020923224256,
+  "seconds": 116.88570490002166
+ },
+ {
+  "direction": "up",
+  "cooling_flow": 750.0,
+  "converged": false,
+  "outer_iterations": 150,
+  "metallization": 1.0,
+  "dri_T_C": 85.70266882174894,
+  "top_gas_T_C": 321.39297205633613,
+  "seconds": 83.24168249999639
+ },
+ {
+  "direction": "up",
+  "cooling_flow": 775.0,
+  "converged": true,
+  "outer_iterations": 54,
+  "metallization": 0.7901632145303579,
+  "dri_T_C": 69.99995345924998,
+  "top_gas_T_C": 351.50535359157186,
+  "seconds": 23.645999300002586
+ },
+ {
+  "direction": "up",
+  "cooling_flow": 800.0,
+  "converged": true,
+  "outer_iterations": 16,
+  "metallization": 0.7605115110803023,
+  "dri_T_C": 69.99995205390951,
+  "top_gas_T_C": 349.51923700497684,
+  "seconds": 7.827669200021774
+ },
+ {
+  "direction": "down",
+  "cooling_flow": 800.0,
+  "converged": true,
+  "outer_iterations": 19,
+  "metallization": 0.7605114591440286,
+  "dri_T_C": 69.99995205389365,
+  "top_gas_T_C": 349.5192456006855,
+  "seconds": 14.606804600043688
+ },
+ {
+  "direction": "down",
+  "cooling_flow": 775.0,
+  "converged": true,
+  "outer_iterations": 28,
+  "metallization": 0.7901631164450984,
+  "dri_T_C": 69.99995345922366,
+  "top_gas_T_C": 351.50536975560135,
+  "seconds": 11.010478000040166
+ },
+ {
+  "direction": "down",
+  "cooling_flow": 750.0,
+  "converged": false,
+  "outer_iterations": 150,
+  "metallization": 1.0,
+  "dri_T_C": 70.00000000000131,
+  "top_gas_T_C": 324.1602827246728,
+  "seconds": 105.42496789997676
+ },
+ {
+  "direction": "down",
+  "cooling_flow": 725.0,
+  "converged": false,
+  "outer_iterations": 150,
+  "metallization": 1.0,
+  "dri_T_C": 114.91631754906854,
+  "top_gas_T_C": 323.0699777628055,
+  "seconds": 102.24480109999422
+ },
+ {
+  "direction": "down",
+  "cooling_flow": 700.0,
+  "converged": false,
+  "outer_iterations": 150,
+  "metallization": 0.9277342848475336,
+  "dri_T_C": 69.99915562218177,
+  "top_gas_T_C": 349.8454840800098,
+  "seconds": 109.90137079998385
+ },
+ {
+  "direction": "down",
+  "cooling_flow": 675.0,
+  "converged": false,
+  "outer_iterations": 150,
+  "metallization": 1.0,
+  "dri_T_C": 69.99973978989397,
+  "top_gas_T_C": 344.990772042416,
+  "seconds": 127.12756650004303
+ },
+ {
+  "direction": "down",
+  "cooling_flow": 650.0,
+  "converged": false,
+  "outer_iterations": 150,
+  "metallization": 0.9845048915640376,
+  "dri_T_C": -21.718498322753334,
+  "top_gas_T_C": 370.18789301591585,
+  "seconds": 130.01548549998552
+ },
+ {
+  "direction": "down",
+  "cooling_flow": 625.0,
+  "converged": false,
+  "outer_iterations": 150,
+  "metallization": 0.9464163364080799,
+  "dri_T_C": 6.657537045290326,
+  "top_gas_T_C": 378.9126616949154,
+  "seconds": 137.1596331000328
+ },
+ {
+  "direction": "down",
+  "cooling_flow": 600.0,
+  "converged": true,
+  "outer_iterations": 45,
+  "metallization": 0.9555913348592319,
+  "dri_T_C": 122.32154665866761,
+  "top_gas_T_C": 363.29769719099943,
+  "seconds": 58.287589800020214
+ },
+ {
+  "direction": "down",
+  "cooling_flow": 575.0,
+  "converged": true,
+  "outer_iterations": 29,
+  "metallization": 0.9476672314634151,
+  "dri_T_C": 167.22450493702627,
+  "top_gas_T_C": 362.7116179417387,
+  "seconds": 57.33020460000262
+ },
+ {
+  "direction": "down",
+  "cooling_flow": 550.0,
+  "converged": true,
+  "outer_iterations": 30,
+  "metallization": 0.9397183973773798,
+  "dri_T_C": 210.17428696017703,
+  "top_gas_T_C": 362.11697136981013,
+  "seconds": 67.61773419997189
+ },
+ {
+  "direction": "down",
+  "cooling_flow": 525.0,
+  "converged": true,
+  "outer_iterations": 28,
+  "metallization": 0.9317395236393093,
+  "dri_T_C": 251.37570972788853,
+  "top_gas_T_C": 361.51892663571016,
+  "seconds": 67.29342520004138
+ },
+ {
+  "direction": "down",
+  "cooling_flow": 500.0,
+  "converged": true,
+  "outer_iterations": 26,
+  "metallization": 0.9237153580629334,
+  "dri_T_C": 291.01534481996794,
+  "top_gas_T_C": 360.91791594172514,
+  "seconds": 67.59682710003108
+ }
+]

@@ -20,6 +20,8 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from matplotlib.axes import Axes
+from matplotlib.figure import Figure
 
 from shaftsim import uq
 
@@ -44,7 +46,7 @@ REDUCTOR = {"metallization": 0.933, "top_gas_T_C": 344.0, "dri_T_C": 261.0, "gud
 SHOW = ("metallization", "h2_consumption_kg_per_t", "dri_T_C", "top_gas_T_C")
 
 
-def style(ax: plt.Axes) -> None:
+def style(ax: Axes) -> None:
     ax.set_facecolor(SURFACE)
     ax.grid(color=GRID, lw=0.6)
     for side in ("top", "right"):
@@ -122,7 +124,7 @@ def grid_table(mc: dict[str, np.ndarray], fine: dict[str, np.ndarray]) -> pd.Dat
     return pd.DataFrame(rows).set_index("output")
 
 
-def plot_profiles(mc: dict[str, np.ndarray], nom: uq.RunResult) -> plt.Figure:
+def plot_profiles(mc: dict[str, np.ndarray], nom: uq.RunResult) -> Figure:
     ok = mc["converged"]
     z = 15.0 - mc["z_depth"]
     fig, axes = plt.subplots(2, 3, figsize=(12, 10.5), dpi=150, sharey=True)
@@ -170,7 +172,7 @@ def plot_profiles(mc: dict[str, np.ndarray], nom: uq.RunResult) -> plt.Figure:
     return fig
 
 
-def plot_outputs(mc: dict[str, np.ndarray], nom: uq.RunResult) -> plt.Figure:
+def plot_outputs(mc: dict[str, np.ndarray], nom: uq.RunResult) -> Figure:
     ok = mc["converged"]
     names = output_names(mc)
     fig, axes = plt.subplots(1, 4, figsize=(14, 3.8), dpi=150)
@@ -188,7 +190,7 @@ def plot_outputs(mc: dict[str, np.ndarray], nom: uq.RunResult) -> plt.Figure:
     return fig
 
 
-def plot_convergence(mc: dict[str, np.ndarray]) -> plt.Figure:
+def plot_convergence(mc: dict[str, np.ndarray]) -> Figure:
     ok = mc["converged"]
     names = output_names(mc)
     sizes = [n for n in (16, 32, 64, 128, 256, 512, 1024) if n <= ok.sum()]
@@ -208,7 +210,7 @@ def plot_convergence(mc: dict[str, np.ndarray]) -> plt.Figure:
     return fig
 
 
-def plot_sobol(so: dict[str, np.ndarray]) -> plt.Figure:
+def plot_sobol(so: dict[str, np.ndarray]) -> Figure:
     meta = json.loads(str(so["meta"]))
     groups, ind = meta["groups"], meta["indices"]
     fig, axes = plt.subplots(1, 4, figsize=(14, 3.8), dpi=150, sharey=True)

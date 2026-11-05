@@ -1,0 +1,26 @@
+# Ranges of the one-at-a-time sensitivity study of Milestone 7 (case A as the base point).
+#
+# Same conventions as data/kinetics.yaml (quotes checked by tests/test_provenance.py). Each
+# range is one that the cited source treats as realistic; the model is not run outside it.
+
+bustle_temperature:
+  low: {value: 1088.15, unit: K, source: Marsigny2025b-T1-image, note: "815 degC, case D of Table 1"}
+  high: {value: 1223.15, unit: K, source: Marsigny2025b-T1-image, note: "950 degC, case C of Table 1"}
+
+bustle_flow:
+  # Cooling gas fixed at 500 mol/s (case A). Low: the lowest bustle flow of Fig. 10 (800 mol/s
+  # cooling). High: the gas-to-solid ratio of case E (2800 mol/s for 43 kg/s), applied to
+  # 45 kg/s: 2800 * 45 / 43 - 500 = 2430 mol/s.
+  low: {value: 2000.0, unit: mol/s, source: Marsigny2025b-Fig10}
+  high: {value: 2430.0, unit: mol/s, source: Marsigny2025b-T1-image,
+         note: "derived from case E, rounded to 10 mol/s"}
+
+pellet_diameter:
+  low: {value: 0.010, unit: m, source: Marsigny2025-thesis-dp, ref_file: thesis2025_h2rich.txt,
+        quote: "porous pellets in blast furnaces and shaft furnaces (dp = 10-15 mm)", as_written: "10",
+        factor: 1.0e-3}
+  high: {value: 0.015, unit: m, source: Marsigny2025-thesis-dp, ref_file: thesis2025_h2rich.txt,
+         quote: "porous pellets in blast furnaces and shaft furnaces (dp = 10-15 mm)", as_written: "15",
+         factor: 1.0e-3,
+         note: "case A uses 15 mm, the top of the range; the kinetic model was checked on
+                10-16.5 mm Vale pellets (Marsigny 2025, Metals 15:1034)"}

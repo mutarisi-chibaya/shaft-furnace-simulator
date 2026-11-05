@@ -1,0 +1,3 @@
+# For Streamlit Community Cloud (app/streamlit_app.py): installs the shaftsim package from
+# this repository with the app extras. Local development: pip install -e ".[dev,uq,app]".
+.[app]

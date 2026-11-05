@@ -26,6 +26,7 @@ import sys
 import time
 import warnings
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 from SALib.analyze import sobol as sobol_analyze
@@ -195,7 +196,8 @@ def main() -> None:
         print(json.dumps(meta["indices"], indent=1))
     OUT.mkdir(parents=True, exist_ok=True)
     path = OUT / f"{a.kind}_{cells}cells.npz"
-    np.savez_compressed(path, meta=np.array(json.dumps(meta)), **data)
+    arrays: dict[str, Any] = {"meta": np.array(json.dumps(meta)), **data}
+    np.savez_compressed(path, **arrays)
     ok = data["converged"]
     print(
         f"wrote {path.relative_to(ROOT)}: {ok.sum()}/{ok.size} converged "

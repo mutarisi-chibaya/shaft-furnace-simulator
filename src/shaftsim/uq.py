@@ -193,6 +193,7 @@ class RunResult:
         converged: Whether the solver converged (unconverged runs are kept and counted).
         seconds: Wall time of the run [s].
         retried: Whether the run needed the tighter fallback tolerance (TOL_T_RETRY).
+        energy_closure: Relative energy balance closure of the solution [-].
     """
 
     outputs: dict[str, float]
@@ -203,6 +204,7 @@ class RunResult:
     converged: bool
     seconds: float
     retried: bool = False
+    energy_closure: float = float("nan")
 
 
 #: Solver settings for sampling: looser than the defaults, far below physical effects
@@ -252,6 +254,7 @@ def run_one(prob: en.ThermalProblem) -> RunResult:
         converged=sol.converged,
         seconds=time.perf_counter() - t0,
         retried=retried,
+        energy_closure=float(sol.energy_closure),
     )
 
 

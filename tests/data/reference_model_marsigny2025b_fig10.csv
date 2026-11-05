@@ -1,0 +1,10 @@
+# REDUCTOR, case B with varied cooling gas flow (total gas flow 2800 mol/s): burden
+# metallisation (Marsigny, Mirgaux & Patisson 2025, Metals 15:862, Fig. 10,
+# CC BY 4.0), digitised by scripts/digitize_reductor_fig10.py (do not edit).
+# Resolution: 1 px = 0.0052 %; checked against Table 1 at 500 and 700
+# mol/s (within 0.05 %).
+cooling_flow_mol_s,bustle_flow_mol_s,metallization_pct
+500,2300,93.27
+600,2200,94.57
+700,2100,93.67
+800,2000,92.20

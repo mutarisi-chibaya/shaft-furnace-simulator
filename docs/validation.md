@@ -657,3 +657,162 @@ python scripts/plot_uq.py
 ```
 
 The notebook `notebooks/06_uncertainty.ipynb` reads `results/uq/` and reproduces the tables and figures.
+
+---
+
+## Milestone 7 – Operating cases, sensitivities, CO2 and the app
+
+### Data (all fetched and checked by scripts; sources in `data/SOURCES.md`)
+
+| Data | File | How it was obtained and checked |
+|---|---|---|
+| Inputs and outputs of REDUCTOR cases A–E | `data/furnace_cases.yaml`, `tests/data/reference_model_marsigny2025b_cases.csv` | Read from the page image of Table 1. Every value occurs in the PDF text layer; the case A column equals the Milestone 5 file. Per-case consistency checks found three inconsistencies in the source, which are kept as printed: case B GUD 0.33 where its top gas gives 0.315, and top-gas flows of cases C and E 7 and 34 mol/s below the inlet total (`scripts/extract_reductor_cases.py`) |
+| Metallisation vs cooling gas flow (Fig. 10) | `tests/data/reference_model_marsigny2025b_fig10.csv` | Bars digitised from the embedded image, axis calibrated on the ticks (residual 0.002 %). The 500 and 700 mol/s bars reproduce Table 1 (cases A, B) within 0.03 % (`scripts/digitize_reductor_fig10.py`) |
+| Energy demand of case A from the authors' gas-loop model | `tests/data/reference_energy_marsigny2025_thesis_t20.csv` | Thesis Table 20, rows checked verbatim, parts add up (`scripts/extract_thesis_table20.py`) |
+| Electrolysis 18 MJ/Nm³ H₂, heater efficiency 0.7, condenser exit 70 °C; natural-gas DRI and route benchmarks | `data/emissions.yaml` | Quotes checked by `tests/test_provenance.py`. The normal cubic metre (0 °C, 101.325 kPa, DIN 1343) converts 18 MJ/Nm³ to 403 kJ/mol = 55.6 kWh/kg H₂ |
+| Grid CO2 intensity (life-cycle), South Africa, world, France, 2015–2025 | `data/grid_intensity.yaml` | Ember yearly data, downloaded by `scripts/fetch_grid_intensity.py` |
+| Sensitivity ranges | `data/sensitivity.yaml` | Bustle temperature 815–950 °C (cases D and C); bustle flow 2000–2430 mol/s (Fig. 10 low end; case E's gas-to-solid ratio); pellet diameter 10–15 mm (Marsigny thesis: "porous pellets in blast furnaces and shaft furnaces (dp = 10-15 mm)") |
+
+### Code
+
+- `shaftsim.operating`:
+  - `OperatingConditions`: bustle and cooling flows and temperatures, gas composition, burden flow and temperature, pellet diameter, mean pressure.
+  - Functions to read conditions from a case, apply them to a case, and load the REDUCTOR cases.
+  - Tests: case A from `furnace_cases.yaml` equals `furnace.yaml` to 1e-12, round trip, validation.
+- `shaftsim.emissions`: electricity per kg of DRI (electrolysis for the H₂ consumed, plus bustle-gas heating) and CO2 for a grid intensity.
+  - The heating is the enthalpy rise of the bustle gas from 70 °C, divided by the heater efficiency. The gas loop's heat exchanger is not modelled, so this term is an upper bound.
+  - Tests: unit conversions, heating = ∫Cp dT, arithmetic, and case A against the thesis.
+- `shaftsim.scenario`: one operating point → KPIs, profiles, energy and balance closures (used by the app).
+- `uq.run_one` now also records the energy closure.
+
+### Energy demand of case A vs the authors' gas-loop model
+
+| GJ per t DRI | Model, 50 cells | Model, 200 cells | Thesis Table 20 |
+|---|---|---|---|
+| Electrolysis | 9.78 | 9.56 | 9.73 |
+| Gas heating | 2.49 (no heat recovery) | 2.47 | 2.28 |
+| Compression | not modelled | not modelled | 0.25 |
+| Total | 12.27 | 12.04 | 12.26 |
+
+- Electrolysis follows from the H₂ consumption, so it agrees as well as the H₂ consumption does (−2 % on 200 cells).
+- The heating term is within 10 % of the paper's, although the heat exchanger is not modelled.
+- A test checks case A on 50 cells against the thesis values (2 % for electrolysis, 5 % for the sum).
+
+### REDUCTOR cases B–E: change from case A, model vs REDUCTOR
+
+No parameter was changed between cases except the operating conditions of Table 1. "n.c." = no converged solution on that grid.
+
+| Case (what changes) | Output | 50 cells | 100 cells | 200 cells | REDUCTOR |
+|---|---|---|---|---|---|
+| B (200 mol/s from bustle to cooling) | metallisation (% pts) | −7.0 | −5.7 | n.c. | +0.4 |
+| | DRI T (K) | −194 | −209 | n.c. | −95 |
+| | top gas T (K) | −5.4 | −4.2 | n.c. | −3 |
+| C (32 % N₂, bustle 950 °C) | metallisation | +1.0 | +2.0 | +2.9 | −0.1 |
+| | top gas T | +41 | +41 | +41 | +50 |
+| | DRI T | +68 | +63 | +56 | +141 |
+| | GUD | +0.129 | +0.131 | +0.132 | +0.14 |
+| D (burden at 1200 °C, bustle 815 °C) | metallisation | +5.4 | +6.3 | +7.6 | +0.8 |
+| | top gas T | +429 | +436 | +456 | +462 |
+| | DRI T | +120 | +84 | −27 | +69 |
+| E (burden 43 kg/s) | metallisation | +5.4 | +6.3 | n.c. | +6.7 |
+| | top gas T | +12 | +12 | n.c. | +9 |
+| | DRI T | −12 | −21 | n.c. | +142 |
+
+Reading the table:
+
+- **Reproduced:**
+  - the top-gas temperature response to N₂ dilution (C) and to a hot burden (D), within 10 K of 50 K and 462 K;
+  - the gain in gas utilisation with N₂ (+0.13 vs +0.14);
+  - full metallisation in case E.
+- **Not reproduced: the DRI temperature.**
+  - In REDUCTOR the DRI is 140 K hotter in cases C and E. In the model it is +56 K and −20 K.
+  - This is the cooling-zone difference of Milestone 5: in 1D the burden is cooled in a thin front at the outlet, whose temperature is set by the cooling gas.
+- **Metallisation changes are larger than REDUCTOR's in B, C and D.**
+  - Case A in 1D is less reduced at the bustle (Milestone 5), so it gains more from a hotter or better-supplied upper shaft.
+  - In D the model reaches full metallisation, against REDUCTOR's 94.1 %.
+  - Case D (burden at 1200 °C) lies 300 K above the temperature range of the kinetic data (TGA at 600–900 °C), so it is an extrapolation. Bustle gas at 950 °C (case C, top of the temperature sweep) lies 50 K above it.
+- **Case D's DRI temperature is not grid-converged** (+120 → +84 → −27 K from 50 to 200 cells).
+
+### Cooling-gas flow: a regime change of the 1D model
+
+![Cooling sweep](../figures/m7_cooling_sweep.png)
+
+Case B conditions, cooling flow 500–800 mol/s at a constant total of 2800 mol/s. On 200 cells the sweep was solved by continuation upward from 500 and downward from 800 mol/s (`scripts/run_cooling_continuation.py`).
+
+| Cooling flow (mol/s) | 500 | 550 | 600 | 625–750 | 775 | 800 |
+|---|---|---|---|---|---|---|
+| Metallisation, 200 cells (%) | 92.4 | 94.0 | 95.6 | n.c. | 79.0 | 76.1 |
+| DRI T, 200 cells (°C) | 291 | 210 | 122 | n.c. | 70 | 70 |
+| Metallisation, 50 cells (%) | 94.6 | | 96.2 | 87.6 (700) | | 77.3 |
+| REDUCTOR, Fig. 10 (%) | 93.3 | | 94.6 | 93.7 (700) | | 92.2 |
+
+- **Up to 600 mol/s**, the model reproduces Fig. 10's trend, including the optimum at about 600 mol/s: more H₂ reaches the lower shaft, while the burden is still cooled in a thin front at the outlet. That front cools by about 45 K for every 25 mol/s.
+- **Above about 750 mol/s**, the cooling gas cools the whole lower cone. The DRI leaves at the gas inlet temperature (70 °C) and wüstite reduction stops in the cold cone, so metallisation falls to 76 % at 800 mol/s. REDUCTOR declines only to 92 %, presumably because its cooling gas is distributed in 2D and a hot core remains.
+- **Between the two regimes**, the heat-capacity flows of the cooling gas and the reduced burden in the cone are nearly equal. The cooling front can then sit anywhere in the cone, and the coupled iteration does not converge on 200 cells.
+  - The continuation branches from both sides give identical values where they converge, with no hysteresis, and both fail at 625–750 mol/s.
+  - Earlier diagnostics tried damped iteration, Anderson acceleration with less memory and more damping, and a prototype pseudo-transient (implicit pseudo-time) energy step. All three end in a cycle between states (a period-2 oscillation of 1.5 K): near the front, a cell's wüstite runs out or not depending on its temperature, so the coupled map is not smooth.
+  - A fully coupled Newton solver or a regularised rate law near full conversion would be needed. That is beyond this milestone, so these points are reported as unsolved.
+- Case B itself (700 mol/s) and case E (burden fully reduced in the cone) fall into this difficulty on 200 cells. They converge on 50 and 100 cells, where the front is smeared over a few cells.
+
+### Sensitivities (one at a time around case A)
+
+![Sensitivities](../figures/m7_sensitivity.png)
+
+| Input over its range | Metallisation, 200 cells | H₂ (kg/t DRI) | t CO2/t DRI, SA grid |
+|---|---|---|---|
+| Bustle gas 815 → 923 °C (950 °C: n.c.) | 0.689 → 1.0 | 37.0 → 51.6 | 1.85 → 2.52 |
+| Bustle flow 2000 → 2344 mol/s (2430: n.c.) | 0.742 → 0.955 | 39.3 → 49.3 | 1.93 → 2.41 |
+| Pellet diameter 10 → 15 mm | 0.928 → 0.924 | 48.0 → 47.8 | 2.35 → 2.34 |
+
+- **Heat and gas supply dominate.**
+  - Over the ranges spanned by the paper's own cases, the bustle temperature and flow move metallisation by 0.2–0.3.
+  - Both act mainly on wüstite reduction around the bustle, the stage Milestone 5 found starved in 1D.
+- **Pellet size hardly matters here** (−0.004 from 10 to 15 mm). Wüstite reduction is limited by heat and H₂ supply, not by diffusion in the pellet. Wagner (2008) reported a strong size effect with other kinetics, and the kinetics here come from one pellet type, so this should not be generalised.
+- **H₂ and CO2 per tonne rise with metallisation** because more oxygen is removed. The rise reflects a more reduced product, not a less efficient one.
+- The 50-cell curves have the same shape, offset by the known grid error.
+- The endpoints at full metallisation (950 °C, 2430 mol/s) did not converge on 200 cells.
+
+### CO2 per tonne of DRI and the electricity grid
+
+![CO2 vs grid](../figures/m7_co2.png)
+
+Case A on 200 cells needs 12.0 GJ of electricity per t DRI: 9.6 for electrolysis and 2.5 for heating.
+
+| Grid (Ember 2025, life-cycle) | g CO2e/kWh | t CO2/t DRI |
+|---|---|---|
+| South Africa | 699 | 2.34 |
+| World | 460 | 1.54 |
+| France | 41 | 0.14 |
+| Break-even with natural-gas DRI (0.45 t/t direct) | 135 | 0.45 |
+
+- **On South Africa's grid**, hydrogen DRI emits about 5× the direct emissions of a natural-gas shaft furnace (H₂:CO 55:45, thesis Table 20). It also emits more per tonne of DRI than the BF-BOF route emits per tonne of crude steel (2.2 t/t, IEA 2020), although those two numbers have different system boundaries.
+- **Hydrogen DRI pays off only below about 135 g/kWh**, i.e. on dedicated renewables or a low-carbon grid.
+  - The natural-gas figure excludes upstream methane and electricity, so the true break-even is somewhat higher.
+  - Excluding compression (~2 % of the energy) lowers the hydrogen figure slightly.
+- The grid is the dominant lever: within the cited operating ranges, the furnace itself changes CO2 per tonne by −21 % to +8 % around case A (1.85–2.52 t/t on the SA grid). Most of that change comes with a change of product (metallisation).
+
+### App (`app/streamlit_app.py`)
+
+- **Inputs:** sliders over the cited ranges (bustle temperature and flow, cooling flow, N₂ fraction, burden flow, pellet diameter), REDUCTOR presets A, B, C and E, a grid choice (South Africa, world, France or custom), and 50 or 100 cells.
+- **Outputs:**
+  - KPI tiles and REDUCTOR's values when a preset is unchanged;
+  - three profile charts (temperatures, gas, step conversions), with legends, direct labels and a table view;
+  - CO2 against grid intensity;
+  - an "Assumptions and limits" panel.
+- **Behaviour:** about 15 s per run on 50 cells, with cached results. Unconverged runs are flagged as errors.
+- **Tests:** `tests/test_app.py` runs the app headless (Streamlit AppTest) on case A and switches to case C.
+- **Deployment:** `requirements.txt` installs the package for Streamlit Community Cloud.
+- **CI:** `.github/workflows/ci.yml` runs ruff, mypy and pytest on Python 3.11 and 3.12. The provenance tests that need the downloaded papers are skipped in CI.
+
+### Limitations of Milestone 7
+
+- **Model form.** All of Milestones 5–6 applies: 1D plug flow, one mean pressure, no heat losses, kinetics from one source, and pellet structure from another pellet type.
+- **Grid.** Results on 200 cells are still about 0.01–0.015 from the converged metallisation (Milestone 5). Changes between operating points are less grid-sensitive than absolute values, except where the cooling front changes regime.
+- **Solver.** The coupled iteration does not converge where the cooling front is balanced inside the cone, or in some fully reduced cases on fine grids. Those points are reported as unsolved, never as results.
+- **Kinetic range.** The kinetics were fitted at 600–900 °C. Case D (1200 °C burden) is an extrapolation, and bustle gas at 950 °C a mild one.
+- **Energy and CO2.**
+  - Covered: electrolysis and bustle-gas heating, with no heat recovery.
+  - Not covered: compression, pelletising, the EAF, plant construction and upstream emissions of natural gas.
+  - Grid intensities are annual averages; an electrolyser running on hourly surplus renewables would see a different intensity.
+
+The notebook `notebooks/07_analysis.ipynb` reproduces the tables and figures from `results/`.

@@ -38,3 +38,27 @@ midpoints), `mean_lo`/`mean_hi` (the same with the band edges: the true average 
 between), `centre`/`wall` (r < 0.15 m / outer 0.15 m), `r_edge` (detected radius of the
 coloured region, checked against the geometry), `classified` (fraction of pixels matched to
 a band). Resolution: one colour band (100 K, 0.05 in H2 fraction, 0.1 in mass fraction).
+
+## `reference_model_marsigny2025b_cases.csv` (Milestone 7)
+
+Inputs and outputs of REDUCTOR cases A-E (Table 1 of the same paper), long format: `case,key,
+unit,value,printed,output,description`. Written by `scripts/extract_reductor_cases.py`
+(page image, every value checked against the text layer; the case A column must equal the
+file above). Three inconsistencies of the source are reported and kept as printed: case B
+GUD 0.33 where its top-gas composition gives 0.315; top-gas flow of cases C and E 7 and
+34 mol/s below the inlet total. The same script generates the model inputs in
+`data/furnace_cases.yaml`.
+
+## `reference_model_marsigny2025b_fig10.csv` (Milestone 7)
+
+Metallisation vs cooling gas flow (500-800 mol/s, total 2800 mol/s, case B otherwise), Fig.
+10 of the same paper, digitised from the embedded image by
+`scripts/digitize_reductor_fig10.py` (axis calibrated on the ticks; 1 px = 0.005 %; the 500
+and 700 mol/s bars agree with Table 1, cases A and B, within 0.05 %).
+
+## `reference_energy_marsigny2025_thesis_t20.csv` (Milestone 7)
+
+Energy demand of case A from the gas-loop model (electrolysis, heating, compression, total;
+GJ per tonne of DRI), Table 20 of Marsigny's PhD thesis (2025), written by
+`scripts/extract_thesis_table20.py` (rows checked verbatim in the text layer; parts add up
+to the total).

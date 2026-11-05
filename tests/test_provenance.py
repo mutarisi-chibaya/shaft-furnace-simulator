@@ -23,7 +23,7 @@ from .conftest import DATA_DIR, ROOT
 REF_DIR = ROOT / "references"
 
 
-FILES = ("kinetics.yaml", "furnace.yaml", "uncertainty.yaml")
+FILES = ("kinetics.yaml", "furnace.yaml", "uncertainty.yaml", "emissions.yaml", "sensitivity.yaml")
 
 
 def _entries() -> list[tuple[str, dict[str, Any]]]:

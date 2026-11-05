@@ -55,11 +55,13 @@ def base(furnace, species, td, trip) -> en.ThermalProblem:  # type: ignore[no-un
 
 
 def _max_rel(a, b) -> float:  # type: ignore[no-untyped-def]
-    return max(
-        abs(getattr(x[j], k) / getattr(y[j], k) - 1)
-        for x, y in zip(a, b, strict=True)
-        for j in range(3)
-        for k in ("a_chem", "a_diff", "a_ext", "ratio")
+    return float(
+        max(
+            abs(getattr(x[j], k) / getattr(y[j], k) - 1)
+            for x, y in zip(a, b, strict=True)
+            for j in range(3)
+            for k in ("a_chem", "a_diff", "a_ext", "ratio")
+        )
     )
 
 
