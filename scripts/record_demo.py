@@ -47,12 +47,12 @@ OVERLAY_JS = """
   Object.assign(c.style, {position: 'fixed', left: '50%', bottom: '28px',
     transform: 'translateX(-50%)', maxWidth: '1150px', padding: '12px 22px',
     background: 'rgba(11,11,11,0.82)', color: '#fcfcfb', font: '500 21px/1.4 system-ui, sans-serif',
-    borderRadius: '10px', zIndex: 100000, textAlign: 'center', display: 'none'});
+    borderRadius: '10px', zIndex: 2147483001, textAlign: 'center', display: 'none'});
   document.body.appendChild(c);
   const k = document.createElement('div');
   k.id = 'demo-card';
   Object.assign(k.style, {position: 'fixed', inset: '0', background: '#fcfcfb', color: '#0b0b0b',
-    zIndex: 99999, display: 'none', flexDirection: 'column', justifyContent: 'center',
+    zIndex: 2147483000, display: 'none', flexDirection: 'column', justifyContent: 'center',
     padding: '0 160px', font: '400 26px/1.5 system-ui, sans-serif'});
   document.body.appendChild(k);
   const s = document.createElement('style');
@@ -301,7 +301,10 @@ def scene_actions() -> list[Actions]:
     ]
 
 
-def run(url: str, record: bool, plan: list[tuple[str, list[tuple[str, float]]]]) -> Path | None:
+def run(
+    url: str, record: bool, plan: list[tuple[str, list[tuple[str, float]]]]
+) -> tuple[Path | None, float]:
+    """Play the scenes; return (raw video, seconds of page loading before scene 1)."""
     with sync_playwright() as p:
         browser = p.chromium.launch(channel="chrome", headless=True)
         opts: dict[str, object] = {"viewport": VIEW, "color_scheme": "light"}
@@ -311,9 +314,11 @@ def run(url: str, record: bool, plan: list[tuple[str, list[tuple[str, float]]]])
             opts["record_video_size"] = VIEW
         ctx = browser.new_context(**opts)  # type: ignore[arg-type]
         page = ctx.new_page()
+        t_video = time.perf_counter()  # the recording starts with the page
         page.goto(url)
         d = Demo(page)
         d.wait_results()
+        lead = time.perf_counter() - t_video
         for (title, sents), actions in zip(plan, scene_actions(), strict=True):
             print(f"  {title}", flush=True)
             for i, (sentence, secs) in enumerate(sents):
@@ -331,7 +336,7 @@ def run(url: str, record: bool, plan: list[tuple[str, list[tuple[str, float]]]])
         video = page.video
         ctx.close()
         browser.close()
-        return Path(video.path()) if (record and video) else None
+        return (Path(video.path()) if (record and video) else None), lead
 
 
 def main() -> None:
@@ -359,10 +364,12 @@ def main() -> None:
         print("rehearsal (fills the app cache):")
         run(a.url, False, plan)
     print("recording:")
-    raw = run(a.url, True, plan)
+    raw, lead = run(a.url, True, plan)
     assert raw is not None
     final = OUT / "demo.mp4"
-    cmd = [ffmpeg, "-y", "-i", str(raw)]
+    # cut the page loading before scene 1 from the video input only (the voice-over starts at
+    # scene 1); input seeking is frame-accurate when re-encoding
+    cmd = [ffmpeg, "-y", "-ss", f"{lead:.2f}", "-i", str(raw)]
     if with_voice:
         lst = OUT / "audio_list.txt"
         lst.write_text("".join(f"file '{f.as_posix()}'\n" for f in audio), encoding="utf-8")

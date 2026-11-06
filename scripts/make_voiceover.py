@@ -21,6 +21,8 @@ from __future__ import annotations
 import argparse
 import os
 import re
+import shutil
+import subprocess
 import urllib.request
 from pathlib import Path
 from xml.sax.saxutils import escape
@@ -80,11 +82,53 @@ def synthesize(text: str, key: str, region: str) -> bytes:
         return bytes(r.read())
 
 
+def plain_text(paragraphs: list[str]) -> str:
+    """Narration as plain text with the pronunciation aliases applied (offline engine)."""
+    text = " ".join(paragraphs)
+    for written, spoken in ALIASES.items():
+        text = re.sub(rf"{re.escape(written)}", spoken, text)
+    return text
+
+
+def synthesize_windows(text: str, voice: str, wav: Path) -> None:
+    """Offline speech with an installed Windows voice (System.Speech via PowerShell)."""
+    ps = (
+        "Add-Type -AssemblyName System.Speech;"
+        "$s = New-Object System.Speech.Synthesis.SpeechSynthesizer;"
+        f"$s.SelectVoice('{voice}'); $s.Rate = -1;"
+        f"$s.SetOutputToWaveFile('{wav}');"
+        "$s.Speak([Console]::In.ReadToEnd()); $s.Dispose()"
+    )
+    subprocess.run(["powershell", "-NoProfile", "-Command", ps], input=text, text=True, check=True)
+
+
+def synthesize_edge(text: str, voice: str, rate: str, mp3: Path) -> None:
+    """Neural voice through the edge-tts package (Microsoft Edge's online read-aloud voices).
+
+    Unofficial: edge-tts imitates the Edge browser's read-aloud client. It needs no key but
+    may stop working if Microsoft changes the service, and it is not licensed for commercial
+    use. Plain text only (no SSML), so the pronunciation aliases are applied as text.
+    """
+    import asyncio
+
+    import edge_tts
+
+    asyncio.run(edge_tts.Communicate(text, voice=voice, rate=rate).save(str(mp3)))
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--voice", default="en-ZA-LukeNeural")
     ap.add_argument("--rate", default="-5%", help="speaking rate, e.g. -5%% (slower) or +0%%")
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument(
+        "--engine",
+        choices=("azure", "edge", "windows"),
+        default="azure",
+        help="azure: South African neural voice (needs a key); edge: the same voice through "
+        "the unofficial edge-tts package (no key); windows: an installed offline voice, e.g. "
+        "--voice 'Microsoft David Desktop' (placeholder, not South African)",
+    )
     a = ap.parse_args()
     sc = scenes(SCRIPT)
     words = sum(len(p.split()) for _, ps in sc for p in ps)
@@ -92,6 +136,46 @@ def main() -> None:
     if a.dry_run:
         for title, ps in sc:
             print(f"\n# {title}\n{ssml(ps, a.voice, a.rate)}")
+        return
+    if a.engine == "edge":
+        OUT.mkdir(parents=True, exist_ok=True)
+        for i, (title, ps) in enumerate(sc, start=1):
+            mp3 = OUT / f"scene_{i:02d}.mp3"
+            synthesize_edge(plain_text(ps), a.voice, a.rate, mp3)
+            print(f"  scene {i:02d} ({title}): {mp3.stat().st_size / 1024:.0f} kB ({a.voice})")
+        print(f"wrote {OUT.relative_to(ROOT)}")
+        return
+    if a.engine == "windows":
+        ffmpeg = shutil.which("ffmpeg")
+        if ffmpeg is None:
+            raise SystemExit("ffmpeg not found")
+        voice = a.voice if a.voice != "en-ZA-LukeNeural" else "Microsoft David Desktop"
+        OUT.mkdir(parents=True, exist_ok=True)
+        for i, (title, ps) in enumerate(sc, start=1):
+            wav = OUT / f"scene_{i:02d}.wav"
+            synthesize_windows(plain_text(ps), voice, wav)
+            mp3 = OUT / f"scene_{i:02d}.mp3"
+            subprocess.run(
+                [
+                    ffmpeg,
+                    "-v",
+                    "error",
+                    "-y",
+                    "-i",
+                    str(wav),
+                    "-ar",
+                    "24000",
+                    "-ac",
+                    "1",
+                    "-b:a",
+                    "96k",
+                    str(mp3),
+                ],
+                check=True,
+            )
+            wav.unlink()
+            print(f"  scene {i:02d} ({title}): {mp3.stat().st_size / 1024:.0f} kB ({voice})")
+        print(f"wrote {OUT.relative_to(ROOT)} (offline voice, placeholder)")
         return
     key, region = os.environ.get("AZURE_SPEECH_KEY"), os.environ.get("AZURE_SPEECH_REGION")
     if not key or not region:

@@ -384,6 +384,9 @@ def step_rates_array(
     x_h2: FloatArray,
     x_h2o: FloatArray,
     multiplier: float = 1.0,
+    one_minus: FloatArray | None = None,
+    availability_width: float = 0.0,
+    min_width: float = 0.0,
 ) -> FloatArray:
     """Vectorised :func:`step_rates` for many cells at once [1/s].
 
@@ -393,27 +396,59 @@ def step_rates_array(
         x_h2, x_h2o: Bulk mole fractions, shape (n,).
         multiplier: Scales all rates (1 = physical; 0 = no reaction; large = towards local
             equilibrium). For tests and limiting cases only.
+        one_minus: Optional 1 - X, shape (3, n), given directly instead of computed from X
+            (full precision near complete conversion; shaftsim.coupled passes u^3). The
+            results are the same as with X up to rounding.
+        availability_width: Width delta [-] over which the availability constraint fades in
+            as the gap X_(j-1) - X_j closes (smoothstep); 0 = the original switch, which is
+            discontinuous where X_j reaches X_(j-1) with r_j > r_(j-1).
+        min_width: Relative width eta of the smooth minimum used in the constraint,
+            min(a, b) ~ (a^-p + b^-p)^(-1/p) with p = 1/eta (relative error at most
+            eta ln 2, exactly 0 if a or b is 0); 0 = exact min.
+            Both widths are used by the coupled Newton solver (shaftsim.coupled), whose
+            convergence needs a smooth residual; their effect on the outputs is tested.
 
     Returns:
         dX_j/dt, shape (3, n), with the availability constraint X3 <= X2 <= X1.
     """
     n = X.shape[1]
+    om = 1.0 - X if one_minus is None else np.asarray(one_minus)
     r = np.zeros((3, n))
     for j, c in enumerate(coeffs):
         x_eq = (x_h2 + x_h2o) / (1.0 + c.ratio)
         d_eq = x_h2 - x_eq
-        d_chem = x_h2 - x_h2o / c.ratio
-        ok = (d_eq > 0.0) & (d_chem > 0.0) & (X[j] < 1.0)
-        one = np.maximum(1.0 - X[j], 1e-15)
+        one = np.maximum(om[j], 1e-15 if one_minus is None else 1e-300)
         f_prime = (1.0 / 3.0) * one ** (-2.0 / 3.0)
         g_prime = 2.0 * (one ** (-1.0 / 3.0) - 1.0)
+        d_chem = x_h2 - x_h2o / c.ratio
+        ok = (d_eq > 0.0) & (d_chem > 0.0) & (om[j] > 0.0)
         with np.errstate(divide="ignore", invalid="ignore"):
             denom = (c.a_chem / d_chem) * f_prime + (c.a_diff / d_eq) * g_prime + c.a_ext / d_eq
             r[j] = np.where(ok, 1.0 / denom, 0.0)
     r *= multiplier
     for j in (1, 2):
-        lim = X[j] >= X[j - 1]
-        r[j] = np.where(lim, np.minimum(r[j], r[j - 1]), r[j])
+        if availability_width == 0.0 and min_width == 0.0:
+            lim = om[j] <= om[j - 1]  # X_j >= X_(j-1): step j limited by step j-1
+            r[j] = np.where(lim, np.minimum(r[j], r[j - 1]), r[j])
+            continue
+        a, b = r[j], r[j - 1]
+        if min_width > 0.0:
+            # p-norm minimum (a^-p + b^-p)^(-1/p), p = 1/eta, in the overflow-free form
+            # lo (1 + (lo/hi)^p)^(-1/p): analytic for a, b > 0, exactly 0 when either rate is 0
+            # (a step at equilibrium stays at rest), and lo 2^(-eta) <= m <= lo
+            lo, hi = np.minimum(a, b), np.maximum(a, b)
+            with np.errstate(divide="ignore", invalid="ignore"):
+                q = np.where(hi > 0.0, lo / hi, 0.0)
+            m = lo * (1.0 + q ** (1.0 / min_width)) ** (-min_width)
+        else:
+            m = np.minimum(a, b)
+        gap = om[j] - om[j - 1]  # X_(j-1) - X_j: product of step j-1 still available
+        if availability_width > 0.0:
+            t = np.clip(1.0 - gap / availability_width, 0.0, 1.0)
+            w = t * t * (3.0 - 2.0 * t)  # smoothstep: 1 at gap <= 0, 0 at gap >= width
+        else:
+            w = (gap <= 0.0).astype(float)
+        r[j] = a + (m - a) * w
     return r
 
 

@@ -223,7 +223,9 @@ def run_one(prob: en.ThermalProblem) -> RunResult:
     """Solve one sample and collect its outputs (temperatures in degC, see RunResult).
 
     If the run is flagged unconverged it is re-solved once from its own end state with
-    ``tol_T = TOL_T_RETRY``; the result keeps the flag of that second solve.
+    ``tol_T = TOL_T_RETRY``; if still unconverged, the coupled solver finishes from that end
+    state (:func:`shaftsim.coupled.finish_coupled`). The result keeps the flag of the last
+    solve.
     """
     import time
 
@@ -237,6 +239,10 @@ def run_one(prob: en.ThermalProblem) -> RunResult:
             species_tol=float(SOLVER["species_tol"]),
             T_start=(sol.Ts, sol.Tg),
         )
+    if not sol.converged:  # alternating scheme cycles: coupled finish (Milestone 8)
+        from . import coupled as cp
+
+        sol, _ = cp.finish_coupled(prob, sol)
     s = sol.species
     return RunResult(
         outputs={

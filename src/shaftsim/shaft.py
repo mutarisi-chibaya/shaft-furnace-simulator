@@ -345,6 +345,8 @@ class ShaftProblem:
         cell_coeffs: Optional per-cell coefficients (length n_cells); if given they replace
             ``coeffs`` (non-isothermal shaft). A step that cannot proceed in a cell has an
             infinite a_chem (zero rate).
+        availability_width, min_width: Smoothing of the availability constraint (see
+            :func:`shaftsim.pellet.step_rates_array`); 0 = the original discontinuous rule.
     """
 
     case: ShaftCase
@@ -354,6 +356,8 @@ class ShaftProblem:
     cell_coeffs: (
         tuple[tuple[pl.StepCoefficients, pl.StepCoefficients, pl.StepCoefficients], ...] | None
     ) = None
+    availability_width: float = 0.0
+    min_width: float = 0.0
 
     def coeffs_of(
         self, i: int
@@ -439,13 +443,26 @@ class ShaftProblem:
         """Inverse of :meth:`unpack`."""
         return np.column_stack([X.T, f]).ravel()
 
-    def residual(self, y: FloatArray) -> FloatArray:
-        """Scaled steady-state residual (dimensionless), same ordering as the unknowns."""
+    def residual(self, y: FloatArray, one_minus: FloatArray | None = None) -> FloatArray:
+        """Scaled steady-state residual (dimensionless), same ordering as the unknowns.
+
+        ``one_minus`` optionally gives 1 - X, shape (3, n), at full precision (see
+        :func:`shaftsim.pellet.step_rates_array`).
+        """
         X, f = self.unpack(y)
         gr = self.grid
         x_h2 = f
         x_h2o = gr.g - f
-        r = pl.step_rates_array(self._coeff_arrays, X, x_h2, x_h2o, self.rate_multiplier)
+        r = pl.step_rates_array(
+            self._coeff_arrays,
+            X,
+            x_h2,
+            x_h2o,
+            self.rate_multiplier,
+            one_minus=one_minus,
+            availability_width=self.availability_width,
+            min_width=self.min_width,
+        )
         X_up = np.concatenate([np.zeros((3, 1)), X[:, :-1]], axis=1)
         res_s = (X - X_up) - gr.kappa * r
         xbar = np.asarray(pl.overall_conversion(X))

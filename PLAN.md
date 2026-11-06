@@ -125,6 +125,18 @@ This milestone answers a gap that a December 2025 review of hydrogen shaft furna
 
 **Polish:** limitations section (1D, steady state, no radial effects, no sticking or fines, kinetics from one source), GitHub Actions (ruff, mypy, pytest), README with the best two figures and the app link.
 
+## Milestone 8 – Numerics and pressure (approved 2026-11-06)
+
+**Solver:** fully coupled Newton (species and energy in one sparse system) with coupled pseudo-transient globalisation; non-smooth points of the rate law smoothed only over a width whose effect on outputs is tested below 1e-6. Must converge where the alternating iteration cycles (case B sweep 625–750 mol/s on 200 cells).
+
+**Scheme:** second-order upwind with a smooth limiter (van Albada), conservative so the balances stay exact; observed order measured against the reaction-free shooting reference.
+
+**Pressure:** Ergun pressure drop (constants cited), local pressure in the transport properties; bustle and cooling pressures compared with REDUCTOR Table 1 (cases A–E), not tuned.
+
+**Energy (conditional):** gas-loop heat recovery and compression from Shao et al. (2021) if openly accessible.
+
+**Then:** rerun the Milestone 5 and 7 comparisons on converged grids; update tests (regression values with reasons), figures, notebooks, docs, app.
+
 ## Prompt for each milestone
 
 ```

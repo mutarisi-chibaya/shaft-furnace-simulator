@@ -22,7 +22,7 @@ uq = ["SALib>=1.4"]
 notebook = ["nbformat>=5.9", "nbconvert>=7.0", "ipykernel>=6.25"]
 # screenshots and the demo video (scripts/capture_app_screenshots.py, record_demo.py); uses a
 # local Chrome through Playwright's "chrome" channel, so no browser download is needed
-demo = ["playwright>=1.40"]
+demo = ["playwright>=1.40", "edge-tts>=7.0"]
 dev = ["pytest>=8", "ruff>=0.5", "mypy>=1.10", "types-PyYAML", "pandas-stubs"]
 
 [tool.setuptools.packages.find]

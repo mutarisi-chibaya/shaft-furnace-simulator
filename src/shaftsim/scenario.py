@@ -14,6 +14,7 @@ from pathlib import Path
 import numpy as np
 from numpy.typing import NDArray
 
+from . import coupled as cp
 from . import emissions as em
 from . import energy as en
 from . import operating as op
@@ -112,8 +113,11 @@ def run_scenario(base: BaseModel, oc: op.OperatingConditions, n_cells: int = 50)
     """Solve the furnace at the given operating conditions.
 
     Uses the sampling tolerances of Milestone 6 (uq.SOLVER) and its fallback
-    (uq.TOL_T_RETRY). On 50 cells a run takes about 10-15 s (property tables included); the
-    result is not grid-converged (docs/validation.md, Milestones 5-6).
+    (uq.TOL_T_RETRY). If the alternating scheme still does not converge (it cycles where the
+    cone's cooling front is balanced, Milestone 7), the coupled solver finishes from its end
+    state (:func:`shaftsim.coupled.finish_coupled`, smoothing effect below 1e-6). On 50 cells
+    a run takes about 10-15 s (property tables included); the result is not grid-converged
+    (docs/validation.md, Milestones 5-6).
     """
     t0 = time.perf_counter()
     case = op.apply(base.case, oc)
@@ -126,6 +130,8 @@ def run_scenario(base: BaseModel, oc: op.OperatingConditions, n_cells: int = 50)
             species_tol=float(uq.SOLVER["species_tol"]),
             T_start=(sol.Ts, sol.Tg),
         )
+    if not sol.converged:  # Milestone 7 band: finish with the coupled solver (Milestone 8)
+        sol, _ = cp.finish_coupled(prob, sol)
     s = sol.species
     sprob = prob.species_problem(sol.Ts, sol.Tg)
     closure = sh.element_balances(sprob, s)

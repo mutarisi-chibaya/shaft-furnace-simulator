@@ -11,7 +11,12 @@ Sources of the spoken facts: blast furnace 2.2 t CO₂ per tonne of crude steel 
 Africa's electricity generation in 2025 (Ember yearly data, the file downloaded by
 `scripts/fetch_grid_intensity.py`); everything else from the app itself.
 
-Before recording: run the app (`streamlit run app/streamlit_app.py`), open it at 1600×1000 or
+Automatic version: with the app running on port 8599, `python scripts/record_demo.py` drives
+the app through these scenes and writes `build/demo/demo.mp4`, with the narration as captions.
+If `build/voiceover/scene_XX.mp3` exist (from `scripts/make_voiceover.py`), each scene is timed
+to its audio and the voice-over is mixed in.
+
+Recording by hand instead? Before recording: run the app (`streamlit run app/streamlit_app.py`), open it at 1600×1000 or
 larger, select case A and run each scenario once so the results are cached and appear
 instantly on camera.
 

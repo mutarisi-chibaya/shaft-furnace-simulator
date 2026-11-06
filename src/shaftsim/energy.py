@@ -239,6 +239,8 @@ class ThermalProblem:
     kinetics: pl.Triplets | None = None
     tortuosity_factor: float = 1.0
     transfer_mix: float = 0.0
+    availability_width: float = 0.0
+    min_width: float = 0.0
 
     #: Fields that change the solution but not the property tables (see with_parameters).
     TABLE_FREE_FIELDS = frozenset(
@@ -249,6 +251,8 @@ class ThermalProblem:
             "kinetics",
             "tortuosity_factor",
             "transfer_mix",
+            "availability_width",
+            "min_width",
         }
     )
 
@@ -542,7 +546,15 @@ class ThermalProblem:
     def species_problem(self, Ts: FloatArray, Tg: FloatArray) -> sh.ShaftProblem:
         """Species problem at frozen temperature profiles."""
         cc = self.cell_coefficients(Ts, Tg)
-        return sh.ShaftProblem(self.case.shaft, cc[0], self.n_cells, self.rate_multiplier, cc)
+        return sh.ShaftProblem(
+            self.case.shaft,
+            cc[0],
+            self.n_cells,
+            self.rate_multiplier,
+            cc,
+            availability_width=self.availability_width,
+            min_width=self.min_width,
+        )
 
     # ------------------------------------------------------------------ energy equations
 
