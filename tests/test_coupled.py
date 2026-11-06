@@ -150,6 +150,21 @@ def test_release_lifts_core_radius_off_bound() -> None:
     np.testing.assert_array_equal(np.delete(z2, 1), np.delete(z, 1))
 
 
+def test_rescue_ignores_a_bad_end_state(
+    prob: en.ThermalProblem, alternating: en.ThermalSolution
+) -> None:
+    """From the end state of an alternating run stopped after one outer iteration (far from
+    the solution), rescue converges through the coarse start and agrees with the converged
+    alternating solution to the smoothing effect."""
+    bad = en.solve_thermal(prob, max_outer=1)
+    assert not bad.converged
+    sol, st, start = cp.rescue(prob, bad)
+    assert sol.converged and st.converged
+    assert start in ("coarse", "end_state")
+    assert abs(sol.species.metallization - alternating.species.metallization) < 1e-6
+    assert abs(sol.T_solid_out - alternating.T_solid_out) < 1e-3
+
+
 # ----------------------------------------------------------------------------- rate law
 
 

@@ -20,9 +20,7 @@ operating point are case A of Marsigny, Mirgaux & Patisson (2025), a 15 m cylind
 
 ## 2. Starting the app
 
-**Online:** open the link at the top of the repository's `README.md`.
-
-**On your own computer** (Windows PowerShell, from the project folder):
+The app runs on your own computer (Windows PowerShell, from the project folder):
 
 ```powershell
 python -m venv .venv
@@ -37,6 +35,15 @@ you have already computed come back instantly.
 ## 3. A tour of the screen
 
 ![The app with case A](../figures/tutorial/01_overview.png)
+
+From top to bottom: a panel that explains the furnace in plain words, with a diagram; a row
+of **Try this** buttons; the headline numbers with a one-sentence summary; electricity and
+CO₂; and the profiles inside the furnace. At the bottom: *Assumptions and limits*, a
+**Glossary** of the words used, and the profile data as a table.
+
+**Try this** buttons set all the controls for a guided scenario (a cooler hydrogen feed, more
+cold gas at the bottom, clean electricity, or back to the reference case) and tell you what to
+look for. The note disappears as soon as you change a control yourself.
 
 ### The sidebar: your inputs
 
@@ -55,7 +62,8 @@ you have already computed come back instantly.
 | Grid cells | Resolution of the calculation: 50 (about 15 s) or 100 (about 40 s) | — |
 
 The ranges are those the cited sources treat as realistic; the app does not let you leave
-them. The app re-runs automatically when you change an input.
+them. The app re-runs automatically when you change an input. Hover over the ⓘ next to a
+control or a headline number to see what it means.
 
 ### The headline numbers
 
@@ -65,7 +73,7 @@ them. The app re-runs automatically when you change an input.
 - **H₂:** hydrogen consumed per tonne of DRI.
 - **Top gas:** temperature of the gas leaving at the top.
 - **DRI outlet:** temperature of the product at the bottom.
-- **Electricity:** electricity per tonne of DRI for electrolysis and gas heating.
+- **Electricity:** electricity per tonne of DRI for electrolysis, gas heating and compression.
 - **CO₂:** that electricity times the grid intensity you chose.
 
 Below the tiles, a line reports the grid size, run time, gas utilisation, production rate and
@@ -85,7 +93,8 @@ the start of the cone.
 - **Conversion of each step:** hematite is reduced near the top, magnetite and wüstite around
   the bustle, and the rest of the wüstite in the cone.
 
-A table of the same profiles is in **Profile data (table)** at the bottom of the page.
+A table of the same profiles is in **Profile data (table)** at the bottom of the page, next
+to the **Glossary**.
 
 ### Electricity and CO₂
 
@@ -136,12 +145,13 @@ In short:
   start-up or upsets. Against the 2D model REDUCTOR, the outlet values of case A agree within
   a few percent, but the reduction front sits lower in 1D, so part of the agreement is
   compensation.
-- The app's **50-cell grid is coarse**: on fine grids metallisation is about 3 percentage
-  points lower and the DRI about 30 K hotter. Use the app to compare scenarios, and the
+- The app's **50-cell grid is coarse**: the grid-converged case A has a metallisation about
+  4 percentage points lower and a DRI about 40 K hotter. Use the app to compare scenarios, and the
   scripts on fine grids for absolute numbers (`docs/validation.md`).
-- Some conditions **do not converge** on fine grids (for example cooling gas around
-  625–750 mol/s). The app shows an error instead of numbers when a run does not converge.
-- **CO₂** covers electrolysis and gas heating only, not gas compression, pelletising, the
+- Some conditions (for example cooling gas around 625–750 mol/s) need a slower, fully
+  coupled solver, which the app calls automatically. A few fully reduced extremes still do
+  not converge; the app then shows an error instead of numbers.
+- **CO₂** covers electrolysis, gas heating and gas compression, not pelletising, the
   electric arc furnace or building the plant.
 
 ## 6. Going further

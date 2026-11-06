@@ -141,6 +141,8 @@ class Demo:
         native range input, whose value is the slider value.
         """
         box = self.slider(label)
+        box.scroll_into_view_if_needed()  # measure where the drag will happen
+        self.page.wait_for_timeout(300)
         rng = box.locator('input[type="range"]')
         thumb = rng.locator("xpath=../..")
         track = box.locator('[role="group"] > div[data-orientation="horizontal"]').first
@@ -153,12 +155,14 @@ class Demo:
         self.page.mouse.move(x, y, steps=25)
         self.page.mouse.up()
         self.wait_results()
-        for _ in range(8):  # correct a pixel-rounding miss, one step per key
+        for _ in range(3):  # correct a miss: all key steps at once, then one rerun
             now = float(rng.evaluate("e => e.value"))
-            if abs(now - value) < step / 2:
+            n = round(abs(value - now) / step)
+            if n == 0:
                 break
             rng.focus()
-            rng.press("ArrowRight" if now < value else "ArrowLeft")
+            for _ in range(n):
+                rng.press("ArrowRight" if now < value else "ArrowLeft", delay=20)
             self.wait_results()
 
 
@@ -186,6 +190,17 @@ def timed(sents: list[str], total: float | None) -> list[tuple[str, float]]:
     base = [60.0 * w / WPM for w in words]
     scale = (total / sum(base)) if total else 1.0
     return [(s, b * scale) for s, b in zip(sents, base, strict=True)]
+
+
+def diagram_html() -> str:
+    """The furnace schematic (figures/furnace_schematic.svg) as a full-height card."""
+    svg = (ROOT / "figures" / "furnace_schematic.svg").read_text(encoding="utf-8")
+    svg = svg.replace("<svg ", '<svg style="height:66vh;width:auto" ', 1)
+    return (
+        "<div style='display:flex;flex-direction:column;align-items:center'>"
+        "<div style='font:700 44px/1.15 system-ui,sans-serif;margin-bottom:12px'>"
+        f"How the furnace works</div>{svg}</div>"
+    )
 
 
 def card_html(title: str, lines: list[str]) -> str:
@@ -216,8 +231,9 @@ def scene_actions() -> list[Actions]:
                 )
             ),
         },
-        {  # 2 why it matters
-            0: lambda d: d.card(
+        {  # 2 why it matters: the furnace first (sentences 1-2), then the projects
+            0: lambda d: d.card(diagram_html()),
+            2: lambda d: d.card(
                 card_html(
                     "Why it matters",
                     [
@@ -230,8 +246,8 @@ def scene_actions() -> list[Actions]:
             ),
         },
         {  # 3 what it is
-            0: lambda d: (d.card(None), d.scroll_top()),
-            1: lambda d: d.highlight('[data-testid="stHorizontalBlock"]', 1),
+            0: lambda d: (d.card(None), d.scroll_top(), d.highlight(".st-key-overview")),
+            1: lambda d: d.highlight(".st-key-profiles"),
             2: lambda d: (
                 d.page.get_by_text("Assumptions and limits", exact=True).click(),
                 d.highlight('[data-testid="stExpander"]', 0),
@@ -241,10 +257,10 @@ def scene_actions() -> list[Actions]:
             0: lambda d: (
                 d.page.get_by_text("Assumptions and limits", exact=True).click(),
                 d.scroll_top(),
-                d.highlight('[data-testid="stHorizontalBlock"]', 0),
+                d.highlight(".st-key-kpis"),
             ),
-            2: lambda d: d.highlight('[data-testid="stAlert"]', 0),
-            3: lambda d: d.highlight('[data-testid="stHorizontalBlock"]', 1),
+            2: lambda d: d.highlight(".st-key-reductor"),
+            3: lambda d: d.highlight(".st-key-profiles"),
         },
         {  # 5 bustle temperature
             0: lambda d: (d.scroll_top(), d.highlight_slider("Bustle gas temperature")),
@@ -258,21 +274,21 @@ def scene_actions() -> list[Actions]:
                 d.highlight('[data-testid="stMetric"]', 3),
             ),
             2: lambda d: d.highlight('[data-testid="stMetric"]', 0),
-            3: lambda d: d.highlight('[data-testid="stAlert"]', 0),
+            3: lambda d: d.highlight(".st-key-reductor"),
         },
         {  # 7 South Africa and the grid
             0: lambda d: (
                 d.highlight(None),
                 d.preset("A:"),
-                d.highlight('[data-testid="stHorizontalBlock"]', 2),
+                d.highlight(".st-key-co2"),
             ),
             1: lambda d: d.highlight('[data-testid="stMetric"]', 4),
             2: lambda d: d.highlight('[data-testid="stMetric"]', 5),
-            4: lambda d: (d.radio("France"), d.highlight('[data-testid="stHorizontalBlock"]', 2)),
+            4: lambda d: (d.radio("France"), d.highlight(".st-key-co2")),
             5: lambda d: (
                 d.radio("Custom"),
                 d.slider_to("Custom intensity", 130.0, 0.0, 1000.0, 10.0),
-                d.highlight('[data-testid="stHorizontalBlock"]', 2),
+                d.highlight(".st-key-co2"),
             ),
         },
         {  # 8 limits
@@ -291,7 +307,8 @@ def scene_actions() -> list[Actions]:
                         "Hydrogen shaft furnace simulator",
                         [
                             "Code, data sources and validation: the GitHub repository",
-                            "Try it: the Streamlit app linked in the README",
+                            "Run it: streamlit run app/streamlit_app.py",
+                            "Plain-language guide: docs/tutorial.md",
                             "Built with Python · NumPy · SciPy · Streamlit",
                         ],
                     )

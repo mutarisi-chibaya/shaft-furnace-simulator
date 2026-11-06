@@ -459,11 +459,16 @@ The Milestone 3 and 4 tests pass unchanged: without segments and side inlets the
 | 100 | 55 s | 0.9367 | 361.9 | 278.8 | 0.3146 |
 | 200 | 164 s | 0.9237 | 360.9 | 291.0 | 0.3118 |
 | 400 | 932 s | 0.9157 | 360.3 | 298.3 | 0.3101 |
+| 800 | 59 s ¹ | 0.9112 | 360.0 | 302.5 | 0.3091 |
+| 1600 | 121 s ¹ | 0.9088 | 359.8 | 304.7 | 0.3086 |
+| 3200 | 140 s ¹ | 0.9075 | 359.7 | 305.8 | 0.3083 |
+| **Extrapolated** | | **0.906** | **359.6** | **307** | **0.308** |
 
-- Successive differences in metallisation are 0.009, 0.013 and 0.008. They begin to shrink only between 200 and 400 cells, so convergence is first order and slow.
+¹ Milestone 8: coupled solver, each grid started from the previous one (`scripts/run_grid_study.py`, `results/cases/grid_caseA.json`); it reproduces the 50–400-cell values above.
+
+- Successive differences in metallisation are 0.009, 0.013, 0.008, 0.0046, 0.0024 and 0.0012. From 400 cells on they halve with each refinement (observed order 0.96 on 800/1600/3200): first-order convergence, reached only on fine grids.
 - **The cause:** in the cooling cone the burden is cooled in a thin front at the outlet (see below), and coarse grids smear it.
-- Extrapolating with the last ratio (1.6) gives a metallisation of about **0.90** and a DRI temperature of about **310 °C**; the top gas (~360 °C) is converged to within 1 K.
-- These extrapolations are estimates: the ratio is not yet stable.
+- **Converged estimate (Richardson, 800/1600/3200 cells): metallisation 0.906, DRI 307 °C, top gas 359.6 °C, GUD 0.308.** The 3200-cell values are within 0.0013 and 1.2 K of it. (Milestone 5 estimated about 0.90 and 310 °C from 200/400 cells.)
 - **The 50-cell results look closer to REDUCTOR than the converged ones. That apparent agreement is a discretisation artefact.**
 
 ### Results (400 cells; no parameter adjusted)
@@ -472,11 +477,11 @@ The Milestone 3 and 4 tests pass unchanged: without segments and side inlets the
 
 | Quantity (Table 1) | REDUCTOR | Model, 400 cells | Difference | Converged estimate |
 |---|---|---|---|---|
-| Metallisation (%) | 93.3 | 91.6 | −1.7 | ≈ 90 (−3) |
-| DRI temperature (°C) | 261 | 298 | +37 | ≈ 310 (+50) |
-| Top gas temperature (°C) | 344 | 360 | +16 | ≈ 360 |
+| Metallisation (%) | 93.3 | 91.6 | −1.7 | 90.6 (−2.7) |
+| DRI temperature (°C) | 261 | 298 | +37 | 307 (+46) |
+| Top gas temperature (°C) | 344 | 360 | +16 | 359.6 (+16) |
 | Top gas H2 / H2O (%) | 64.1 / 30.9 | 65.5 / 29.5 | +1.4 / −1.4 | |
-| GUD | 0.33 | 0.310 | −0.020 | |
+| GUD | 0.33 | 0.310 | −0.020 | 0.308 (−0.022) |
 | DRI Fe / FeO / Fe3O4 (wt-%) | 87.16 / 7.71 / 0.5 | 85.2 / 10.2 / 0 | −2.0 / +2.5 / −0.5 | |
 | DRI flow (t/h) | 117.19 | 117.7 | +0.5 | |
 
@@ -517,11 +522,11 @@ Points 2–4 are interpretations of the comparison, not tested hypotheses. Testi
 
 - 1D plug flow against a 2D model with radial gas distribution. The paper itself shows strong radial gradients (unreduced core), which no 1D model can represent.
 - The reference profiles are digitised colour bands: ±1 band, plus misclassified edge pixels, and the r-weighted average assumes axisymmetric plug flow of the solid (REDUCTOR's solid flow is not plug flow in the cone).
-- One constant pressure; no pressure drop computed. The REDUCTOR pressures are used as boundary values.
+- One constant pressure; no pressure drop computed. The REDUCTOR pressures are used as boundary values. (Milestone 8 adds an Ergun pressure field: it matches REDUCTOR's upper shaft within about 10 % and changes case A by less than 4e-4 in metallisation.)
 - Pellet properties other than diameter and hematite content are those of the Milestone 2 Vale pellets. The case A pellet properties are not published.
 - The kinetics come from the same group as REDUCTOR (refitted in Milestone 2), and both models use the three-step model without a direct Fe3O4 → Fe path. Agreement or disagreement therefore says little about the kinetics.
-- Grid: the 400-cell results are about 0.01–0.015 from the converged metallisation and about 10 K from the converged DRI temperature (first order).
-- The 400-cell case takes 15 min. It is too slow for Milestone 6 sampling on this grid; Milestone 6 samples on 50 cells and checks the effect of the grid on the spreads (see below).
+- Grid: the 400-cell results are 0.010 from the converged metallisation and 9 K from the converged DRI temperature (first order; Milestone 8 grid study to 3200 cells).
+- With the alternating solver the 400-cell case takes 15 min, too slow for Milestone 6 sampling; Milestone 6 samples on 50 cells and checks the effect of the grid on the spreads (see below). The coupled solver of Milestone 8 solves fine grids in 1–2 min from a coarser solution, but cold starts still go through the alternating solver.
 
 The notebook `notebooks/05_reductor_comparison.ipynb` reproduces the tables and the figure.
 
@@ -691,22 +696,23 @@ The notebook `notebooks/06_uncertainty.ipynb` reads `results/uq/` and reproduces
 |---|---|---|---|
 | Electrolysis | 9.78 | 9.56 | 9.73 |
 | Gas heating | 2.49 (no heat recovery) | 2.47 | 2.28 |
-| Compression | not modelled | not modelled | 0.25 |
-| Total | 12.27 | 12.04 | 12.26 |
+| Compression (Milestone 8) | 0.20 | 0.20 | 0.25 |
+| Total | 12.47 | 12.24 | 12.26 |
 
 - Electrolysis follows from the H₂ consumption, so it agrees as well as the H₂ consumption does (−2 % on 200 cells).
 - The heating term is within 10 % of the paper's, although the heat exchanger is not modelled.
-- A test checks case A on 50 cells against the thesis values (2 % for electrolysis, 5 % for the sum).
+- Compression (isothermal, Shao et al. 2021; Milestone 8) is 19 % below the thesis value; the totals agree within 2 %.
+- A test checks case A on 50 cells against the thesis values (2 % for electrolysis, 5 % for the total).
 
 ### REDUCTOR cases B–E: change from case A, model vs REDUCTOR
 
-No parameter was changed between cases except the operating conditions of Table 1. "n.c." = no converged solution on that grid.
+No parameter was changed between cases except the operating conditions of Table 1. The 200-cell entries for B and E ("n.c." in Milestone 7) were solved by the coupled solver of Milestone 8 (marked ¹); all other entries are unchanged.
 
 | Case (what changes) | Output | 50 cells | 100 cells | 200 cells | REDUCTOR |
 |---|---|---|---|---|---|
-| B (200 mol/s from bustle to cooling) | metallisation (% pts) | −7.0 | −5.7 | n.c. | +0.4 |
-| | DRI T (K) | −194 | −209 | n.c. | −95 |
-| | top gas T (K) | −5.4 | −4.2 | n.c. | −3 |
+| B (200 mol/s from bustle to cooling) | metallisation (% pts) | −7.0 | −5.7 | −4.4¹ | +0.4 |
+| | DRI T (K) | −194 | −209 | −221¹ | −95 |
+| | top gas T (K) | −5.4 | −4.2 | −3.3¹ | −3 |
 | C (32 % N₂, bustle 950 °C) | metallisation | +1.0 | +2.0 | +2.9 | −0.1 |
 | | top gas T | +41 | +41 | +41 | +50 |
 | | DRI T | +68 | +63 | +56 | +141 |
@@ -714,9 +720,9 @@ No parameter was changed between cases except the operating conditions of Table 
 | D (burden at 1200 °C, bustle 815 °C) | metallisation | +5.4 | +6.3 | +7.6 | +0.8 |
 | | top gas T | +429 | +436 | +456 | +462 |
 | | DRI T | +120 | +84 | −27 | +69 |
-| E (burden 43 kg/s) | metallisation | +5.4 | +6.3 | n.c. | +6.7 |
-| | top gas T | +12 | +12 | n.c. | +9 |
-| | DRI T | −12 | −21 | n.c. | +142 |
+| E (burden 43 kg/s) | metallisation | +5.4 | +6.3 | +7.6¹ | +6.7 |
+| | top gas T | +12 | +12 | +13¹ | +9 |
+| | DRI T | −12 | −21 | −33¹ | +142 |
 
 Reading the table:
 
@@ -739,20 +745,21 @@ Reading the table:
 
 Case B conditions, cooling flow 500–800 mol/s at a constant total of 2800 mol/s. On 200 cells the sweep was solved by continuation upward from 500 and downward from 800 mol/s (`scripts/run_cooling_continuation.py`).
 
-| Cooling flow (mol/s) | 500 | 550 | 600 | 625–750 | 775 | 800 |
-|---|---|---|---|---|---|---|
-| Metallisation, 200 cells (%) | 92.4 | 94.0 | 95.6 | n.c. | 79.0 | 76.1 |
-| DRI T, 200 cells (°C) | 291 | 210 | 122 | n.c. | 70 | 70 |
-| Metallisation, 50 cells (%) | 94.6 | | 96.2 | 87.6 (700) | | 77.3 |
-| REDUCTOR, Fig. 10 (%) | 93.3 | | 94.6 | 93.7 (700) | | 92.2 |
+| Cooling flow (mol/s) | 500 | 550 | 600 | 625 | 650 | 700 | 750 | 800 |
+|---|---|---|---|---|---|---|---|---|
+| Metallisation, 200 cells (%) | 92.4 | 94.0 | 95.6 | 96.2 ¹ | 93.8 ¹ | 88.0 ¹ | 82.0 ¹ | 76.1 |
+| DRI T, 200 cells (°C) | 291 | 210 | 122 | 77 ¹ | 70 ¹ | 70 ¹ | 70 ¹ | 70 |
+| Metallisation, 50 cells (%) | 94.6 | | 96.2 | | | 87.6 | | 77.3 |
+| REDUCTOR, Fig. 10 (%) | 93.3 | | 94.6 | | | 93.7 | | 92.2 |
 
-- **Up to 600 mol/s**, the model reproduces Fig. 10's trend, including the optimum at about 600 mol/s: more H₂ reaches the lower shaft, while the burden is still cooled in a thin front at the outlet. That front cools by about 45 K for every 25 mol/s.
+¹ Unsolved in Milestone 7 (625–750 mol/s); solved in Milestone 8 by the coupled solver, started from the converged neighbouring flow or from the half grid.
+
+- **Up to 625 mol/s**, the model reproduces Fig. 10's trend, with its optimum at 625 mol/s (96.2 %; REDUCTOR's is near 600): more H₂ reaches the lower shaft, while the burden is still cooled in a thin front at the outlet. That front cools by about 45 K for every 25 mol/s.
 - **Above about 750 mol/s**, the cooling gas cools the whole lower cone. The DRI leaves at the gas inlet temperature (70 °C) and wüstite reduction stops in the cold cone, so metallisation falls to 76 % at 800 mol/s. REDUCTOR declines only to 92 %, presumably because its cooling gas is distributed in 2D and a hot core remains.
-- **Between the two regimes**, the heat-capacity flows of the cooling gas and the reduced burden in the cone are nearly equal. The cooling front can then sit anywhere in the cone, and the coupled iteration does not converge on 200 cells.
-  - The continuation branches from both sides give identical values where they converge, with no hysteresis, and both fail at 625–750 mol/s.
-  - Earlier diagnostics tried damped iteration, Anderson acceleration with less memory and more damping, and a prototype pseudo-transient (implicit pseudo-time) energy step. All three end in a cycle between states (a period-2 oscillation of 1.5 K): near the front, a cell's wüstite runs out or not depending on its temperature, so the coupled map is not smooth.
-  - A fully coupled Newton solver or a regularised rate law near full conversion would be needed. That is beyond this milestone, so these points are reported as unsolved.
-- Case B itself (700 mol/s) and case E (burden fully reduced in the cone) fall into this difficulty on 200 cells. They converge on 50 and 100 cells, where the front is smeared over a few cells.
+- **Between the two regimes** (625–750 mol/s), the heat-capacity flows of the cooling gas and the reduced burden in the cone are nearly equal, and the cooling front can sit anywhere in the cone. The alternating iteration cycles there (a period-2 oscillation: near the front, a cell's wüstite runs out or not depending on its temperature). Milestone 7 reported these points as unsolved.
+  - **Milestone 8** solves them with a fully coupled Newton solver. The curve is continuous: metallisation falls steadily from 96.2 % at 625 mol/s to 76.1 % at 800 mol/s as the DRI leaves at the cooling-gas temperature (70 °C).
+  - Both continuation branches (up from 500, down from 800 mol/s) now converge at every flow and agree exactly: no hysteresis.
+- Case B itself (700 mol/s) and case E converge on 200 cells too (table above).
 
 ### Sensitivities (one at a time around case A)
 
@@ -760,9 +767,11 @@ Case B conditions, cooling flow 500–800 mol/s at a constant total of 2800 mol/
 
 | Input over its range | Metallisation, 200 cells | H₂ (kg/t DRI) | t CO2/t DRI, SA grid |
 |---|---|---|---|
-| Bustle gas 815 → 923 °C (950 °C: n.c.) | 0.689 → 1.0 | 37.0 → 51.6 | 1.85 → 2.52 |
-| Bustle flow 2000 → 2344 mol/s (2430: n.c.) | 0.742 → 0.955 | 39.3 → 49.3 | 1.93 → 2.41 |
-| Pellet diameter 10 → 15 mm | 0.928 → 0.924 | 48.0 → 47.8 | 2.35 → 2.34 |
+| Bustle gas 815 → 923 °C (950 °C: n.c.) | 0.689 → 1.0 | 37.0 → 51.6 | 1.88 → 2.56 |
+| Bustle flow 2000 → 2430 mol/s | 0.742 → 1.0 ¹ | 39.3 → 51.6 | 1.96 → 2.57 |
+| Pellet diameter 10 → 15 mm | 0.928 → 0.924 | 48.0 → 47.8 | 2.38 → 2.38 |
+
+CO2 includes compression (Milestone 8). ¹ The 2430 mol/s endpoint was unsolved in Milestone 7 and is solved by the coupled solver in Milestone 8; the 950 °C endpoint on 200 cells (and the 2430 mol/s endpoint on 50 cells) still do not converge.
 
 - **Heat and gas supply dominate.**
   - Over the ranges spanned by the paper's own cases, the bustle temperature and flow move metallisation by 0.2–0.3.
@@ -770,26 +779,25 @@ Case B conditions, cooling flow 500–800 mol/s at a constant total of 2800 mol/
 - **Pellet size hardly matters here** (−0.004 from 10 to 15 mm). Wüstite reduction is limited by heat and H₂ supply, not by diffusion in the pellet. Wagner (2008) reported a strong size effect with other kinetics, and the kinetics here come from one pellet type, so this should not be generalised.
 - **H₂ and CO2 per tonne rise with metallisation** because more oxygen is removed. The rise reflects a more reduced product, not a less efficient one.
 - The 50-cell curves have the same shape, offset by the known grid error.
-- The endpoints at full metallisation (950 °C, 2430 mol/s) did not converge on 200 cells.
+- Of the endpoints at full metallisation, 950 °C still does not converge on 200 cells (nor 2430 mol/s on 50 cells), even with the coupled solver; they are left out.
 
 ### CO2 per tonne of DRI and the electricity grid
 
 ![CO2 vs grid](../figures/m7_co2.png)
 
-Case A on 200 cells needs 12.0 GJ of electricity per t DRI: 9.6 for electrolysis and 2.5 for heating.
+Case A on 200 cells needs 12.2 GJ of electricity per t DRI: 9.6 for electrolysis, 2.5 for heating and 0.2 for compression (added in Milestone 8).
 
 | Grid (Ember 2025, life-cycle) | g CO2e/kWh | t CO2/t DRI |
 |---|---|---|
-| South Africa | 699 | 2.34 |
-| World | 460 | 1.54 |
+| South Africa | 699 | 2.38 |
+| World | 460 | 1.56 |
 | France | 41 | 0.14 |
-| Break-even with natural-gas DRI (0.45 t/t direct) | 135 | 0.45 |
+| Break-even with natural-gas DRI (0.45 t/t direct) | 132 | 0.45 |
 
 - **On South Africa's grid**, hydrogen DRI emits about 5× the direct emissions of a natural-gas shaft furnace (H₂:CO 55:45, thesis Table 20). It also emits more per tonne of DRI than the BF-BOF route emits per tonne of crude steel (2.2 t/t, IEA 2020), although those two numbers have different system boundaries.
-- **Hydrogen DRI pays off only below about 135 g/kWh**, i.e. on dedicated renewables or a low-carbon grid.
+- **Hydrogen DRI pays off only below about 130 g/kWh**, i.e. on dedicated renewables or a low-carbon grid.
   - The natural-gas figure excludes upstream methane and electricity, so the true break-even is somewhat higher.
-  - Excluding compression (~2 % of the energy) lowers the hydrogen figure slightly.
-- The grid is the dominant lever: within the cited operating ranges, the furnace itself changes CO2 per tonne by −21 % to +8 % around case A (1.85–2.52 t/t on the SA grid). Most of that change comes with a change of product (metallisation).
+- The grid is the dominant lever: within the cited operating ranges, the furnace itself changes CO2 per tonne by −21 % to +8 % around case A (1.88–2.57 t/t on the SA grid). Most of that change comes with a change of product (metallisation).
 
 ### App (`app/streamlit_app.py`)
 
@@ -801,18 +809,125 @@ Case A on 200 cells needs 12.0 GJ of electricity per t DRI: 9.6 for electrolysis
   - an "Assumptions and limits" panel.
 - **Behaviour:** about 15 s per run on 50 cells, with cached results. Unconverged runs are flagged as errors.
 - **Tests:** `tests/test_app.py` runs the app headless (Streamlit AppTest) on case A and switches to case C.
-- **Deployment:** `requirements.txt` installs the package for Streamlit Community Cloud.
+- **Running it:** locally (`streamlit run app/streamlit_app.py`); the app is not hosted. `requirements.txt` would let it be deployed on Streamlit Community Cloud.
 - **CI:** `.github/workflows/ci.yml` runs ruff, mypy and pytest on Python 3.11 and 3.12. The provenance tests that need the downloaded papers are skipped in CI.
 
 ### Limitations of Milestone 7
 
 - **Model form.** All of Milestones 5–6 applies: 1D plug flow, one mean pressure, no heat losses, kinetics from one source, and pellet structure from another pellet type.
 - **Grid.** Results on 200 cells are still about 0.01–0.015 from the converged metallisation (Milestone 5). Changes between operating points are less grid-sensitive than absolute values, except where the cooling front changes regime.
-- **Solver.** The coupled iteration does not converge where the cooling front is balanced inside the cone, or in some fully reduced cases on fine grids. Those points are reported as unsolved, never as results.
+- **Solver.** The alternating iteration does not converge where the cooling front is balanced inside the cone, or in some fully reduced cases on fine grids. Milestone 8's coupled solver solves all of these except two full-metallisation endpoints of the sensitivity sweeps, which are reported as unsolved, never as results.
 - **Kinetic range.** The kinetics were fitted at 600–900 °C. Case D (1200 °C burden) is an extrapolation, and bustle gas at 950 °C a mild one.
 - **Energy and CO2.**
-  - Covered: electrolysis and bustle-gas heating, with no heat recovery.
-  - Not covered: compression, pelletising, the EAF, plant construction and upstream emissions of natural gas.
+  - Covered: electrolysis, bustle-gas heating (no heat recovery) and, since Milestone 8, gas compression.
+  - Not covered: heat recovery, pelletising, the EAF, plant construction and upstream emissions of natural gas.
   - Grid intensities are annual averages; an electrolyser running on hourly surplus renewables would see a different intensity.
 
 The notebook `notebooks/07_analysis.ipynb` reproduces the tables and figures from `results/`.
+
+---
+
+## Milestone 8 – Numerics and pressure
+
+Plan (PLAN.md, approved 2026-11-06): a fully coupled solver, a second-order scheme, the Ergun pressure drop, gas-loop energy terms if a source is open, then the Milestone 5 and 7 comparisons rerun. Each step was time-boxed (about 2 h); a missed target is reported here, not relaxed.
+
+### Acceptance targets: outcome
+
+| Target (PLAN.md) | Outcome |
+|---|---|
+| Coupled solver converges where the alternating one cycles (case B sweep 625–750 mol/s, 200 cells) | **Met**: 600–750 mol/s all converge (28–54 s each) |
+| Coupled = alternating where both converge (1e-8) | **Met**: case A, 50 cells, metallisation 7e-11, temperatures 7e-9 K (no smoothing) |
+| Balance closure 1e-12 | **Met** (element and energy closures at round-off, all schemes) |
+| Smoothing effect on outputs below 1e-6 | **Met, narrowly**: at most 9e-7 in metallisation (750 mol/s); case A 4e-8 |
+| Observed order about 2 on the reaction-free reference | **Met**: 1.92–1.99 (second-order scheme) |
+| 100 cells within 0.005 of the extrapolated metallisation | **Missed** by both schemes (about 0.02 off): the reacting solution has kinks |
+| Case A on 200 cells under 2 min | **Met**: 86 s |
+| Ergun pressures compared with REDUCTOR (not tuned) | Done: upper shaft −9 % to +13 %, cone 0.9–3.9× |
+| Gas-loop terms from Shao et al. (2021) if open | Compression added; the paper has no heat-recovery term |
+
+### Coupled solver (`shaftsim/coupled.py`)
+
+- **Unknowns and equations.** All six unknowns of a cell (three step conversions, H2 fraction, two temperatures) are solved in one sparse Newton system. The equations are exactly those of the alternating scheme, so where both converge they give the same solution.
+- **Variables.** The conversions are solved as unreacted-core radii u = (1 − X)^(1/3). In X the rate falls like (1 − X)^(2/3), whose slope is infinite at complete conversion, and Newton steps overshoot.
+- **Globalisation.** Pseudo-transient continuation with a backtracking line search; projection onto the physical bounds; an active set for core radii at complete conversion, and a release step that lifts such a radius when its equation asks it to grow (its slope vanishes there).
+- **Jacobian.** Coloured finite differences (block-banded). The step in u must be far below the smoothing width: with 1e-7 the Jacobian was about 10 % wrong inside the transition and Newton converged only linearly, one cell per iteration. 1e-9 restores quadratic convergence.
+- **Why smoothing is needed.** The availability rule (step 3 limited by step 2 once wüstite runs out) is a switch: where a cell sits on it, the discrete equations have no exact root, and every solver stalls at a residual of about 1e-6. The switch is replaced by a smoothstep over a gap of 1e-5 in conversion, and the minimum of the two rates by a p-norm minimum (relative width 1e-5) that is exactly zero when either rate is zero. A first smooth minimum of the usual square-root form gave a small negative rate behind a step at equilibrium and had to be replaced.
+- **Smoothing effect.** Case A: metallisation −4e-8, DRI +9e-5 K. Case B sweep: 1.7e-7 to 9.1e-7 in metallisation (largest at 750 mol/s), temperatures within 1e-4 K. Widths 1e-3 → 1e-4 → 1e-5 move metallisation by 5.5e-5 and 3.9e-6, about 14× less per decade.
+- **Use.** The alternating solver stays first. The coupled solver takes over only where it fails (`coupled.rescue`, used by `scenario.run_scenario`, `uq.run_one` and the sensitivity and continuation scripts; starts described under Reruns below), so every result that converged before is unchanged. It is a finisher, not a cold-start solver: at 775 mol/s it fails from a coarse start where the alternating solver converges in 18 s.
+
+### Second-order scheme (option, not the default)
+
+MUSCL faces with the van Albada limiter applied to gradients (second order across segment junctions of different cell height), regularised where both gradients vanish, first-order end cells. Conservative: the balances close to round-off.
+
+| Cells | Top gas error, first order (K) | Second order (K) |
+|---|---|---|
+| 25 | 7.8 | 0.72 |
+| 50 | 3.9 | 0.19 |
+| 100 | 2.0 | 0.049 |
+| 200 | 0.99 | 0.012 |
+| 400 | 0.50 | 0.0031 |
+
+Reaction-free case (h × 3e-3) against the RK45 shooting reference of Milestone 4: observed order 1.92–1.99.
+
+**With reactions the gain is small.** Case A metallisation, second order: 0.9319 (100 cells), 0.9195 (200 cells), against an extrapolated value near 0.91. The solution has kinks (X3 pinned to X2, rates switching off at equilibrium, the thin cooling front at the outlet), where any scheme is first order. Second order there is worth about a factor 2 in cells, not an order. The coupled solver also fails to converge with it on 40, 50 and 400 cells (in the zone where the gas is buffered at the magnetite/wüstite equilibrium). It therefore stays an option (`scheme=2`) for smooth problems; the first-order scheme remains the default.
+
+### Pressure field (Ergun, `shaftsim/pressure.py`)
+
+- Ergun (1952) as given by Wagner (2008, p. 90): −dP/dh = [150 (1 − ε)² μ / (ε³ d²) + 1.75 (1 − ε) ρ u / (ε³ d)] u. With the ideal gas, dp/dz = C/p in each cell, so p² is integrated exactly from the top pressure (150 kPa, a boundary value).
+- Local pressure enters only the pellet kinetics, by exact rescaling of the tables: a_chem ∝ 1/p, the Knudsen part of the pore resistance ∝ 1/p (Bosanquet); external transfer and heat transfer do not depend on p. Pressure and solution are iterated to a fixed point (2 iterations).
+- Optional (`ThermalProblem.pressure_cells`); the default stays the mean pressure of Milestone 5.
+
+Against REDUCTOR Table 1 (outputs, `tests/data`), 100 cells, nothing tuned:
+
+| Case | Bustle, model / REDUCTOR (kPa) | Top→bustle Δp, model/REDUCTOR | Cone Δp, model / REDUCTOR (kPa) | Cooling inlet, model / REDUCTOR (kPa) |
+|---|---|---|---|---|
+| A | 180.0 / 180.4 | 0.99 | 4.6 / 1.2 | 184.6 / 181.6 |
+| B | 179.1 / 179.6 | 0.98 | 2.2 / 2.3 | 181.3 / 181.9 |
+| C | 207.0 / 212.4 | 0.91 | 8.1 / 3.1 | 215.1 / 215.5 |
+| D | 177.3 / 178.9 | 0.94 | 3.1 / 1.9 | 180.4 / 180.8 |
+| E | 180.0 / 176.7 | 1.13 | 2.9 / 1.5 | 183.0 / 178.2 |
+
+- **Upper shaft: within −9 % to +13 %**, with the same bed porosity and pellet diameter as REDUCTOR and no fitting.
+- **Cone: 0.9–3.9× REDUCTOR.** In 1D all the cooling gas flows through the mean cross-section of the converging cone; REDUCTOR distributes it in 2D.
+- **Effect on the solution:** cases A–C change by at most 4e-4 in metallisation and 0.3 K at the DRI outlet, so the mean pressure of Milestones 5–7 was adequate there. 
+- **Cases D and E** (fully metallised) need care:
+  - **D:** on 100 cells two different solver paths at mean pressure converge to the same state (DRI 363.1 °C), and local pressure gives 342.5 °C. The 20 K shift is a real model response: D's DRI temperature sits on the steep part of the cooling-front response (Milestone 7), so a small change in the heat balance moves it a lot. On 200 cells local pressure gives 240.9 °C, so this output is not grid-converged either (Milestone 7 found the same at mean pressure).
+  - **E:** the +22 K seen during development compared with an unconverged mean-pressure state (236 °C). The production path (with its tolerance retry) converges at mean pressure on 100 cells to a DRI of 258.2 °C, the same as with local pressure (258.2 °C): no pressure effect.
+  - Conclusion: the DRI temperature of the fully metallised cases is sensitive in this 1D model (case D also to the grid) and should not be quoted to better than tens of kelvin.
+
+### Energy demand: compression (Shao et al. 2021)
+
+The accepted manuscript of Shao et al. (2021) is open (Åbo Akademi repository). Its Eq. 12 gives the compression work, n R T ln(p_feed/p_mixer)/η_c, with η_c = 0.7 and the mixer at 1 atm. Its electrolysis constants (242 kJ/mol, efficiency 0.6) give 18.0 MJ/Nm³, the value already used from Marsigny et al.: an independent check. It has no heat-recovery term, so heat recovery is still not counted.
+
+| GJ per t DRI, case A, 50 cells | Model | Thesis Table 20 |
+|---|---|---|
+| Electrolysis | 9.78 | 9.73 |
+| Gas heating (no heat recovery) | 2.49 | 2.28 |
+| Compression | 0.20 | 0.25 |
+| Total | 12.47 | 12.26 |
+
+Compression is 19 % below the reference: isothermal compression is the minimum work, and the reference's compressor model is not published. The total is within 1.7 %.
+
+### Reruns of Milestones 5 and 7
+
+- **Grid study, case A, to 3200 cells** (Milestone 5 section, `scripts/run_grid_study.py`): first-order convergence reached from 400 cells; converged estimate metallisation 0.906, DRI 307 °C, top gas 359.6 °C. Against REDUCTOR: −2.7 points, +46 K, +16 K.
+- **Cases A–E** on 50, 100 and 200 cells (`scripts/compare_cases.py`): all 27 runs converge; B and E on 200 cells, unsolved before, are now in the Milestone 7 table. Values that converged before are unchanged.
+- **Cooling-flow sweep** on 200 cells (`scripts/run_cooling_continuation.py`): all 13 flows converge on both branches with identical values; the optimum is at 625 mol/s.
+- **Sensitivities** (`scripts/run_sensitivity.py`): the 2430 mol/s endpoint now converges on 200 cells; 950 °C on 200 cells and 2430 mol/s on 50 cells do not.
+- **Energy and CO2:** compression adds 0.20 GJ/t; case A on 200 cells needs 12.2 GJ/t, 2.38 t CO2/t on South Africa's grid; break-even with natural-gas DRI near 130 g/kWh.
+- Figures `m7_*.png` and notebooks 05 and 07 are regenerated from these results.
+
+How the coupled solver is started matters: from the end state of a cycling alternating run it failed at 625 mol/s, because that state can be far from the solution. `coupled.rescue` therefore tries, in order, a converged neighbouring operating point, the alternating solution on half the grid, and only then the end state. Each result records which start was used.
+
+### Tests
+
+`tests/test_coupled.py` (15 tests: variables, Jacobian, agreement with the alternating solver, balances, smoothing effect, release step, rescue, rate-law smoothing, second-order faces and order, guards), `tests/test_pressure.py` (5: Ergun integration against RK45, exact pressure rescaling, solve with pressure), `tests/test_emissions.py` (compression), `tests/test_provenance.py` (Ergun and Shao quotes).
+
+### Limitations of Milestone 8
+
+- **The model is unchanged.** Milestone 8 changes how the equations are solved and adds two outputs (pressure, compression energy); the 1D, plug-flow and kinetic limitations of Milestones 5–7 all remain.
+- **First order is still the default**, and 50-cell results (sampling, app) remain about 0.04 above the converged metallisation and about 40 K below the converged DRI temperature. Fine grids are now cheap from a coarse start (3200 cells in about 2 min), but Milestone 6's sampling was not repeated on them.
+- **The coupled solver is a finisher.** It needs a good start; two full-metallisation sensitivity endpoints still fail.
+- **Smoothing.** The availability switch is smoothed over 1e-5 in the coupled solver; the effect is below 1e-6 in metallisation but close to it (9e-7) at 750 mol/s.
+- **Pressure.** Ergun with the bed porosity and pellet diameter of the case; the cone pressure drop is 1–4× REDUCTOR's. Local pressure is an option and not used in the results above (the mean pressure of Milestone 5 is).
+- **Energy.** Compression is isothermal (minimum work); heat recovery is still not counted, so heating is an upper bound.

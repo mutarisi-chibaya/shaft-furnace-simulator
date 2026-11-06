@@ -10,6 +10,7 @@ cases (data/furnace_cases.yaml); the model is not offered outside them.
 
 from __future__ import annotations
 
+import base64
 import dataclasses
 from pathlib import Path
 
@@ -52,6 +53,85 @@ PRESET_TEXT = {
     "C": "C: 32 % N2, bustle gas at 950 °C",
     "E": "E: burden flow 43 kg/s (full metallisation in REDUCTOR)",
 }
+
+
+#: Guided scenarios: (button text, preset, slider overrides, grid key, what to look for).
+#: All values lie inside the slider ranges; the notes describe directions, not numbers.
+TRY_THIS = {
+    "cooler": (
+        "Cooler hydrogen",
+        "A",
+        {"bustle_T": 840.0},
+        "south_africa",
+        "The hydrogen now enters 50 °C cooler. Watch **metallisation** fall: the last "
+        "reduction step (wüstite to iron) needs heat as well as hydrogen.",
+    ),
+    "cold_gas": (
+        "More cold gas at the bottom",
+        "B",
+        {},
+        "south_africa",
+        "200 mol/s of gas moves from the hot inlet to the cold one (case B of the published "
+        "model). In this 1D model the extra cold gas chills the cone and **metallisation** "
+        "falls, while the published 2D model barely changes: a known limit of 1D (see "
+        "*Assumptions and limits*).",
+    ),
+    "clean": (
+        "Clean electricity",
+        "A",
+        {},
+        "france",
+        "Same furnace, French electricity (mostly nuclear and hydro). **CO₂ per tonne** falls "
+        "about seventeen-fold: the footprint of hydrogen iron is set by the electricity.",
+    ),
+    "reset": ("Back to the reference case", "A", {}, "south_africa", ""),
+}
+
+GLOSSARY = """
+- **Bustle**: the ring of gas inlets around the middle of the shaft, where the hot hydrogen
+  enters.
+- **Burden**: the iron ore pellets moving down through the furnace.
+- **Pellet**: a small ball of iron ore (here 10–15 mm across).
+- **Reduction**: removing the oxygen from the iron ore. Here hydrogen does it and forms water.
+- **Hematite, magnetite, wüstite** (Fe₂O₃, Fe₃O₄, FeO): the iron oxides the ore passes
+  through, one step at a time, on its way to iron (Fe).
+- **DRI** (direct reduced iron): the furnace's product, solid iron that is later melted into
+  steel in an electric arc furnace.
+- **Metallisation**: the share of the iron in the product that is metal rather than oxide.
+- **Top gas**: the gas leaving the top: unused hydrogen and water vapour. The water is
+  condensed out and the hydrogen is recycled.
+- **Cooling gas**: cold gas fed at the bottom of the cone to cool the iron before it leaves.
+- **Gas utilisation**: the share of the top gas (hydrogen plus water vapour) that is water
+  vapour, i.e. how much of the hydrogen did its job on one pass.
+- **Grid CO₂ intensity**: CO₂ emitted per kilowatt-hour of electricity, counted over the life
+  cycle of the power plants.
+- **REDUCTOR**: a published two-dimensional model of the same furnace (Marsigny, Mirgaux and
+  Patisson 2025), used here as the reference.
+- **1D, grid cells**: the model treats each height of the furnace as uniform across its width
+  and splits the height into cells. More cells are more accurate but slower.
+"""
+
+
+def apply_try(name: str) -> None:
+    """Button callback: set the controls for a guided scenario (runs before the rerun)."""
+    _, preset, changes, grid, _ = TRY_THIS[name]
+    ss = st.session_state
+    ss["preset"] = preset
+    ss["_preset_loaded"] = preset
+    for k, v in {**preset_values(preset), **changes}.items():
+        ss[k] = v
+    ss["grid"] = grid
+    ss["_tip"] = name
+    ss["_tip_state"] = None  # filled in on the next run, cleared when a control changes
+
+
+def try_this() -> None:
+    """Row of guided-scenario buttons."""
+    with st.container(key="try"):
+        st.markdown("**Try this** (one click sets the controls on the left):")
+        cols = st.columns(len(TRY_THIS))
+        for col, (name, (text, *_)) in zip(cols, TRY_THIS.items(), strict=True):
+            col.button(text, key=f"try_{name}", on_click=apply_try, args=(name,))
 
 
 # ----------------------------------------------------------------------------- model
@@ -264,25 +344,27 @@ thermodynamics. Mass and energy balances close to round-off (shown below each ru
 structure and kinetics are those of the Vale pellets of the kinetic study.
 
 **Limits you should know before reading the numbers.**
-- **Grid.** The app solves on 50 or 100 cells for speed. That is not grid-converged: on fine
-  grids metallisation is about 0.03 lower (0.02 at 100 cells), the DRI about 30 K hotter and
-  the top gas about 3 K cooler. Differences between scenarios are usually less affected than
-  the absolute values, except near the cooling-gas flow where the cooling front moves into the
-  cone (see Solver below).
+- **Grid.** The app solves on 50 or 100 cells for speed. That is not grid-converged: the
+  converged case A (grid study to 3200 cells) has a metallisation about 0.04 lower (0.03 at
+  100 cells), a DRI about 40 K hotter and a top gas about 3 K cooler. Differences between
+  scenarios are usually less affected than the absolute values, except near the cooling-gas
+  flow where the cooling front moves into the cone (see Solver below).
 - **1D.** No radial gradients, so no H₂-starved core and no wall effects. Against the 2D model
   REDUCTOR, the outlet values agree within a few percent for case A, but the reduction front
   sits 1.5–2 m lower and the cooling zone behaves differently, so the agreement is partly
   compensation.
-- **Not modelled:** pressure drop (one mean pressure, the REDUCTOR value of the chosen preset),
-  heat losses, sticking and fines, burden descent other than plug flow, carbon.
+- **Not modelled:** the local pressure (one mean pressure from the REDUCTOR pressures of the
+  chosen preset is used; an Ergun pressure field exists in the code but changes case A by
+  less than 0.001), heat losses, sticking and fines, burden descent other than plug flow, carbon.
 - **Kinetics from one source** (seven TGA curves of one pellet type, 600–900 °C). Pellet size
   is varied with the same kinetics; bustle gas above 900 °C is a mild extrapolation.
-- **Solver.** On fine grids, conditions where the cooling front sits inside the cone (e.g.
-  cooling gas around 625–750 mol/s) may not converge; the app then shows an error instead of
-  numbers.
-- **Energy and CO₂.** Electricity for electrolysis (18 MJ/Nm³ H₂) and bustle gas heating
+- **Solver.** Where the cooling front sits inside the cone (e.g. cooling gas around
+  625–750 mol/s) the usual iteration cycles and a fully coupled solver takes over, which
+  takes longer. If neither converges, the app shows an error instead of numbers.
+- **Energy and CO₂.** Electricity for electrolysis (18 MJ/Nm³ H₂), bustle gas heating
   (heater efficiency 0.7, no heat recovery, so an upper bound), as in the authors' gas-loop
-  model. Compression (~2 %), pellet making, the EAF and plant construction are not included.
+  model, and gas compression (isothermal, efficiency 0.7, Shao et al. 2021). Pellet making,
+  the EAF and plant construction are not included.
   Grid intensities are Ember's life-cycle values. The natural-gas line is a direct-emission
   figure per tonne of DRI and excludes upstream methane and electricity.
 
@@ -290,20 +372,93 @@ Sources: `data/SOURCES.md`. Validation and limitations in detail: `docs/validati
 """
 
 
+def overview() -> None:
+    """Plain-language summary for visitors without a metallurgy background (read in 30 s).
+
+    The findings restate results documented in docs/validation.md (Milestones 5, 7 and 8).
+    """
+    with st.container(border=True, key="overview"):
+        pic, text = st.columns([5, 4])
+        svg = (ROOT / "figures" / "furnace_schematic.svg").read_bytes()
+        pic.markdown(
+            '<img alt="Schematic of the hydrogen shaft furnace" style="width:100%" '
+            f'src="data:image/svg+xml;base64,{base64.b64encode(svg).decode()}">',
+            unsafe_allow_html=True,
+        )
+        a = b = c = text
+        a.markdown(
+            "**What this is**\n\n"
+            "A computer model of a furnace that turns iron ore into iron using **hydrogen "
+            "instead of coal**, the key step towards low-carbon steel. Inside the furnace "
+            "the hydrogen takes the oxygen out of the ore and leaves as water vapour."
+        )
+        b.markdown(
+            "**What it answers**\n\n"
+            "- How much of the ore becomes usable iron\n"
+            "- How much hydrogen and electricity that takes\n"
+            "- How much CO₂ that electricity causes, in South Africa and elsewhere"
+        )
+        c.markdown(
+            "**Main findings**\n\n"
+            "1. Without any tuning, its prediction of how much of the iron becomes metal is "
+            "within 3 percentage points of a published research model.\n"
+            "2. On South Africa's coal-heavy grid, iron made this way causes about **5× the "
+            "CO₂** of iron made with natural gas. It only pays off with clean electricity.\n"
+            "3. How hot the hydrogen is, and how much is fed in, matter most; the size of "
+            "the ore pellets hardly matters."
+        )
+        st.caption(
+            "Change the settings on the left, or use the buttons below; the results update. "
+            "A step-by-step guide is in docs/tutorial.md; the words used are explained in the "
+            "glossary at the bottom of the page."
+        )
+
+
+def plain_summary(res: sc.ScenarioResult, co2: float, grid_label: str, ng: float) -> str:
+    """One sentence on the headline results in everyday words."""
+    ratio = co2 / ng if ng > 0 else float("nan")
+    if co2 >= ng:
+        compare = f"{ratio:.1f}× the direct emissions of natural-gas iron ({ng:.2f} t)"
+    else:
+        compare = f"less than the direct emissions of natural-gas iron ({ng:.2f} t)"
+    return (
+        f"**In plain words:** {100 * res.metallization:.1f} % of the iron leaves the furnace as "
+        f"metal (the published reference model: {REDUCTOR_A_METALLISATION:.1f} % for its "
+        f"reference case). With {grid_label}, each tonne of iron causes **{co2:.1f} t of CO₂**, "
+        f"{compare}."
+    )
+
+
+#: REDUCTOR metallisation of case A [%] (tests/data, Marsigny et al. 2025b, Table 1).
+REDUCTOR_A_METALLISATION = float(
+    pd.read_csv(ROOT / "tests" / "data" / "reference_model_marsigny2025b_cases.csv", comment="#")
+    .set_index(["case", "key"])
+    .loc[("A", "metallization"), "value"]
+)
+
+
 def main() -> None:
     st.set_page_config(page_title="H₂ shaft furnace", layout="wide")
-    st.title("Hydrogen shaft furnace: 1D simulator")
+    st.title("Making iron with hydrogen: a furnace simulator")
     st.caption(
-        "Steady-state 1D model of a hydrogen direct-reduction shaft furnace. Change the "
-        "operating conditions on the left and run; every parameter is cited in the repository."
+        "A physics-based model of a hydrogen direct-reduction shaft furnace. Every parameter is "
+        "cited in the repository."
     )
+    overview()
+    try_this()
     base = base_model()
     rng = ranges()
 
     with st.sidebar:
         st.header("Operating conditions")
+        st.caption("What goes into the furnace. Hover over ⓘ to see what each control means.")
         preset = st.selectbox(
-            "Start from REDUCTOR case", PRESETS, format_func=lambda k: PRESET_TEXT[k], key="preset"
+            "Start from REDUCTOR case",
+            PRESETS,
+            format_func=lambda k: PRESET_TEXT[k],
+            key="preset",
+            help="Four operating cases of a published 2D model of this furnace (REDUCTOR, "
+            "Marsigny et al. 2025b). Picking one sets all the controls below.",
         )
         if st.session_state.get("_preset_loaded") != preset:
             for k, v in preset_values(preset).items():
@@ -311,10 +466,26 @@ def main() -> None:
             st.session_state["_preset_loaded"] = preset
         lo, hi = rng["bustle_temperature"]
         st.slider(
-            "Bustle gas temperature (°C)", lo - T0, hi - T0, step=5.0, format="%.0f", key="bustle_T"
+            "Bustle gas temperature (°C)",
+            lo - T0,
+            hi - T0,
+            step=5.0,
+            format="%.0f",
+            key="bustle_T",
+            help="How hot the hydrogen is when it enters through the ring of inlets (the "
+            "bustle) around the middle of the furnace. Range of the published studies.",
         )
         lo, hi = rng["bustle_flow"]
-        st.slider("Bustle gas flow (mol/s)", lo, hi, step=10.0, format="%.0f", key="bustle_flow")
+        st.slider(
+            "Bustle gas flow (mol/s)",
+            lo,
+            hi,
+            step=10.0,
+            format="%.0f",
+            key="bustle_flow",
+            help="How much hot gas (mostly hydrogen) enters at the bustle, in moles per second. "
+            "Range of the published studies.",
+        )
         st.slider(
             "Cooling gas flow (mol/s)",
             500.0,
@@ -322,7 +493,8 @@ def main() -> None:
             step=10.0,
             format="%.0f",
             key="cooling_flow",
-            help="Range of Fig. 10 of Marsigny et al. (2025b)",
+            help="Cold gas fed at the bottom of the cone; it cools the iron before it leaves. "
+            "Range of Fig. 10 of Marsigny et al. (2025b).",
         )
         st.slider(
             "N₂ in the feed gas (%)",
@@ -331,7 +503,8 @@ def main() -> None:
             step=1.0,
             format="%.0f",
             key="n2",
-            help="H₂O fixed at 2 %; range of cases A–C",
+            help="Nitrogen dilutes the hydrogen and does not react. The rest of the gas is "
+            "hydrogen and 2 % water vapour. Range of cases A–C.",
         )
         st.slider(
             "Burden flow (kg/s)",
@@ -340,17 +513,27 @@ def main() -> None:
             step=0.5,
             format="%.1f",
             key="solid_flow",
-            help="Range of cases A–E",
+            help="How fast iron ore pellets (the 'burden') are fed at the top, in kilograms "
+            "per second. Range of cases A–E.",
         )
         lo, hi = rng["pellet_diameter"]
         st.slider(
-            "Pellet diameter (mm)", lo * 1000, hi * 1000, step=0.5, format="%.1f", key="pellet"
+            "Pellet diameter (mm)",
+            lo * 1000,
+            hi * 1000,
+            step=0.5,
+            format="%.1f",
+            key="pellet",
+            help="Size of the iron ore pellets. Range of the sensitivity study.",
         )
         st.header("Electricity")
         grid_keys = list(base.emissions.grids)
         grid_choice = st.radio(
             "Grid CO₂ intensity",
             [*grid_keys, "custom"],
+            key="grid",
+            help="CO₂ emitted per kWh of electricity, over the life cycle of the power plants "
+            "(Ember, 2025). The electricity makes the hydrogen and heats the gas.",
             format_func=lambda k: (
                 f"{base.emissions.grids[k].name} ({base.emissions.grids[k].g_per_kWh:.0f} g/kWh, "
                 f"{base.emissions.grids[k].year})"
@@ -368,7 +551,8 @@ def main() -> None:
             "Grid cells",
             (50, 100),
             horizontal=True,
-            help="50 cells: ~15 s per run; 100 cells: ~40 s. Neither is grid-converged.",
+            help="The furnace height is split into cells: more cells are more accurate but "
+            "slower. 50 cells: ~15 s per run; 100 cells: ~40 s. Neither is grid-converged.",
         )
 
     ss = st.session_state
@@ -391,13 +575,59 @@ def main() -> None:
     grid = base.emissions.grids.get(grid_choice) if grid_choice != "custom" else None
     intensity = grid.value if grid is not None else float(custom or 0.0) / 3.6e9
     co2 = em.co2_per_dri(res.energy, intensity)
-    cols = st.columns(6)
-    cols[0].metric("Metallisation (%)", f"{100 * res.metallization:.1f}")
-    cols[1].metric("H₂ (kg/t DRI)", f"{res.h2_consumption:.1f}")
-    cols[2].metric("Top gas (°C)", f"{res.top_gas_T - T0:.0f}")
-    cols[3].metric("DRI outlet (°C)", f"{res.dri_T - T0:.0f}")
-    cols[4].metric("Electricity (GJ/t DRI)", f"{res.energy.total / 1e6:.2f}")
-    cols[5].metric("CO₂ (t/t DRI)", f"{co2:.2f}")
+    ng = base.emissions.benchmarks["ng_dri_direct_55_45"]
+    st.subheader("Results for the settings on the left")
+    tip = ss.get("_tip")
+    state = (inputs, grid_choice)
+    if tip and ss.get("_tip_state") is None:
+        ss["_tip_state"] = state  # the controls as the button set them
+    if tip and ss.get("_tip_state") == state and TRY_THIS[tip][4]:
+        st.info("**What to look for:** " + TRY_THIS[tip][4])
+    elif tip and ss.get("_tip_state") != state:
+        ss["_tip"] = None  # a control was changed by hand: the note no longer applies
+    kpis = st.container(key="kpis")
+    cols = kpis.columns(6)
+    cols[0].metric(
+        "Metallisation (%)",
+        f"{100 * res.metallization:.1f}",
+        help="Share of the iron that leaves the furnace as metal; the rest is still oxide. "
+        "Higher is better.",
+    )
+    cols[1].metric(
+        "H₂ (kg/t DRI)",
+        f"{res.h2_consumption:.1f}",
+        help="Hydrogen used per tonne of product. DRI = direct reduced iron, the furnace's "
+        "product, which is melted into steel afterwards.",
+    )
+    cols[2].metric(
+        "Top gas (°C)",
+        f"{res.top_gas_T - T0:.0f}",
+        help="Temperature of the gas leaving the top of the furnace (it is recycled).",
+    )
+    cols[3].metric(
+        "DRI outlet (°C)",
+        f"{res.dri_T - T0:.0f}",
+        help="Temperature of the iron product leaving the bottom of the furnace.",
+    )
+    cols[4].metric(
+        "Electricity (GJ/t DRI)",
+        f"{res.energy.total / 1e6:.2f}",
+        help="Electricity per tonne of iron: making the hydrogen by electrolysis of water, "
+        "heating the gas and compressing it. 1 GJ = 278 kWh.",
+    )
+    cols[5].metric(
+        "CO₂ (t/t DRI)",
+        f"{co2:.2f}",
+        help="CO₂ caused by that electricity on the grid chosen on the left (life-cycle "
+        f"values). For comparison, iron made with natural gas emits about {ng:.2f} t directly.",
+    )
+    if grid is None:
+        grid_label = "the custom electricity grid"
+    elif grid.name.lower() == "world":
+        grid_label = "the world-average electricity grid"
+    else:
+        grid_label = f"{grid.name}'s electricity grid"
+    st.markdown(plain_summary(res, co2, grid_label, ng))
     st.caption(
         f"{n_cells} cells, {res.seconds:.0f} s. Gas utilisation {res.gud:.3f}; DRI "
         f"{res.dri_flow * 3.6:.1f} t/h. Balance closure: energy {abs(res.energy_closure):.0e}, "
@@ -409,14 +639,43 @@ def main() -> None:
             ROOT / "tests" / "data" / "reference_model_marsigny2025b_cases.csv", comment="#"
         )
         r = ref[ref["case"] == preset].set_index("key")["value"]
-        st.info(
+        st.container(key="reductor").info(
             f"REDUCTOR (2D) for case {preset}: metallisation {r['metallization']:.1f} %, "
             f"top gas {r['top_gas_T']:.0f} °C, DRI {r['dri_T']:.0f} °C, GUD {r['gud']:.2f} "
             "(Marsigny et al. 2025b, Table 1)."
         )
 
+    st.subheader("CO₂ per tonne of DRI and the electricity grid")
+    left, right = st.container(key="co2").columns([3, 2])
+    left.plotly_chart(co2_chart(res.energy, base.emissions, custom), use_container_width=True)
+    breakeven = ng / res.energy.total * 3.6e9
+    right.markdown(
+        f"""
+Electricity per tonne of DRI: **{res.energy.electrolysis / 1e6:.2f} GJ** for electrolysis,
+**{res.energy.heating / 1e6:.2f} GJ** for gas heating and
+**{res.energy.compression / 1e6:.2f} GJ** for gas compression.
+
+- On South Africa's grid ({base.emissions.grids["south_africa"].g_per_kWh:.0f} g/kWh in
+  {base.emissions.grids["south_africa"].year}) hydrogen DRI emits
+  **{em.co2_per_dri(res.energy, base.emissions.grids["south_africa"].value):.2f} t CO₂/t DRI**,
+  about {em.co2_per_dri(res.energy, base.emissions.grids["south_africa"].value) / ng:.0f}× the
+  direct emissions of natural-gas DRI ({ng:.2f} t/t).
+- Hydrogen DRI beats natural-gas DRI only below about **{breakeven:.0f} g CO₂e/kWh**, i.e. on
+  a largely low-carbon supply (dedicated renewables or a clean grid), not on today's average grid.
+- For context: blast furnace steel emits about
+  {base.emissions.benchmarks["bf_bof_crude_steel"]:.1f} t CO₂ per tonne of *crude steel*
+  (IEA 2020), a different basis that includes the steel plant.
+"""
+    )
+
+    st.subheader("Inside the furnace (for specialists)")
+    st.caption(
+        "How temperature, gas composition and the three reduction steps change from the top "
+        "of the furnace (height 15 m) down to the bottom of the cone (−10 m). The hot gas enters "
+        "at the bustle; cold gas enters at the bottom."
+    )
     z = res.height
-    c1, c2, c3 = st.columns(3)
+    c1, c2, c3 = st.container(key="profiles").columns(3)
     c1.plotly_chart(
         profile_chart(
             z, [("Solid", res.Ts - T0, "s2"), ("Gas", res.Tg - T0, "s1")], "Temperature (°C)", ".0f"
@@ -448,32 +707,10 @@ def main() -> None:
         "with the flows. Conversion: fraction of each reduction step completed."
     )
 
-    st.subheader("CO₂ per tonne of DRI and the electricity grid")
-    left, right = st.columns([3, 2])
-    left.plotly_chart(co2_chart(res.energy, base.emissions, custom), use_container_width=True)
-    ng = base.emissions.benchmarks["ng_dri_direct_55_45"]
-    breakeven = ng / res.energy.total * 3.6e9
-    right.markdown(
-        f"""
-Electricity per tonne of DRI: **{res.energy.electrolysis / 1e6:.2f} GJ** for electrolysis,
-**{res.energy.heating / 1e6:.2f} GJ** for gas heating and
-**{res.energy.compression / 1e6:.2f} GJ** for gas compression.
-
-- On South Africa's grid ({base.emissions.grids["south_africa"].g_per_kWh:.0f} g/kWh in
-  {base.emissions.grids["south_africa"].year}) hydrogen DRI emits
-  **{em.co2_per_dri(res.energy, base.emissions.grids["south_africa"].value):.2f} t CO₂/t DRI**,
-  about {em.co2_per_dri(res.energy, base.emissions.grids["south_africa"].value) / ng:.0f}× the
-  direct emissions of natural-gas DRI ({ng:.2f} t/t).
-- Hydrogen DRI beats natural-gas DRI only below about **{breakeven:.0f} g CO₂e/kWh**, i.e. on
-  a largely low-carbon supply (dedicated renewables or a clean grid), not on today's average grid.
-- For context: blast furnace steel emits about
-  {base.emissions.benchmarks["bf_bof_crude_steel"]:.1f} t CO₂ per tonne of *crude steel*
-  (IEA 2020), a different basis that includes the steel plant.
-"""
-    )
-
     with st.expander("Assumptions and limits", expanded=False):
         st.markdown(ASSUMPTIONS)
+    with st.expander("Glossary: the words used here"):
+        st.markdown(GLOSSARY)
     with st.expander("Profile data (table)"):
         st.dataframe(
             pd.DataFrame(

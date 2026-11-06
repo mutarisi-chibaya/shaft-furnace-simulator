@@ -7,11 +7,10 @@
 
 > **Hydrogen Shaft Furnace Simulator** (Python, SciPy, Streamlit)
 > - Built a 1D counter-current moving-bed model of hydrogen direct reduction of iron ore, coupling shrinking-core kinetics with gas–solid heat and mass transfer
-> - Reproduced a published shaft furnace model within X% on metallisation and gas composition
+> - Reproduced a published 2D shaft furnace model (REDUCTOR) without tuning: metallisation within 3 percentage points (90.6 vs 93.3 %, grid-converged) and top-gas H₂/H₂O within 1.4 points
 > - Quantified prediction uncertainty from kinetic parameters with Monte Carlo and Sobol sensitivity analysis, identifying which measurements matter most
 > - Built an interactive app for sensitivity studies and CO2-per-tonne estimates under different electricity grids, including South Africa's
 
-Fill in X with your real validation result.
 
 ## Folder layout
 
@@ -136,6 +135,8 @@ This milestone answers a gap that a December 2025 review of hydrogen shaft furna
 **Energy (conditional):** gas-loop heat recovery and compression from Shao et al. (2021) if openly accessible.
 
 **Then:** rerun the Milestone 5 and 7 comparisons on converged grids; update tests (regression values with reasons), figures, notebooks, docs, app.
+
+**Outcome (2026-11-06):** done; see `docs/validation.md`, Milestone 8. All targets met except "100 cells within 0.005 of the extrapolated metallisation" (missed by both schemes: the reacting solution has kinks), so the second-order scheme stays an option and first order the default. Shao et al. (2021) gives compression but no heat-recovery term.
 
 ## Prompt for each milestone
 

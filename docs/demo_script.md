@@ -29,7 +29,7 @@ iron making". Then fade to the app with case A.
 
 ## Scene 2: Why it matters (0:15–0:45)
 
-**Screen:** the README's "Why this matters" section, scrolling slowly.
+**Screen:** the furnace schematic (`figures/furnace_schematic.svg`) while the furnace is described, then a card with the projects.
 
 > In a hydrogen shaft furnace, iron ore pellets move down while hot hydrogen flows up and strips the oxygen out. The product is direct reduced iron, and the main by-product is water. Projects are under way close to home: ArcelorMittal South Africa is studying hydrogen-based iron at Saldanha, and HyIron is building a plant in Namibia. Before anyone builds one, they need fast and honest models.
 
@@ -66,16 +66,16 @@ to 920 °C.
 **Screen:** back to case A. Show the CO₂ chart; select World, then France, then Custom and slide
 to about 130 g/kWh.
 
-> Hydrogen iron is only as clean as the electricity behind it. Electrolysis and gas heating need about twelve gigajoules of electricity per tonne. On South Africa's grid, which is still more than eighty percent coal, that is two point four tonnes of C-O-two per tonne of iron. That is about five times the direct emissions of a natural gas furnace. On France's low-carbon grid it is zero point one four tonnes. The break-even with natural gas is about one hundred and thirty grams per kilowatt-hour, so for South Africa, green iron means dedicated renewable power, not the average grid.
+> Hydrogen iron is only as clean as the electricity behind it. Electrolysis, gas heating and compression need about twelve and a half gigajoules of electricity per tonne. On South Africa's grid, which is still more than eighty percent coal, that is two point four tonnes of C-O-two per tonne of iron. That is about five times the direct emissions of a natural gas furnace. On France's low-carbon grid it is zero point one four tonnes. The break-even with natural gas is about one hundred and thirty grams per kilowatt-hour, so for South Africa, green iron means dedicated renewable power, not the average grid.
 
 ## Scene 8: How far to trust it (4:10–4:35)
 
 **Screen:** the "Assumptions and limits" panel, scrolled slowly; then `docs/validation.md`.
 
-> A model is only useful if you know its limits. This one is one-dimensional and steady. Its fast grid overestimates metallisation by three points or more, and some operating points do not converge on fine grids. When a run does not converge, the app shows an error instead of a number. All of this is documented, with the tests behind it.
+> A model is only useful if you know its limits. This one is one-dimensional and steady. Its fast grid overestimates metallisation by about four points, and a few extreme operating points still do not converge. When a run does not converge, the app shows an error instead of a number. All of this is documented, with the tests behind it.
 
 ## Scene 9: Close (4:35–4:50)
 
 **Screen:** the repository page with the README figures; app link on screen.
 
-> The code, the data sources and the validation are all in the repository, and the app is online. Thanks for watching.
+> The code, the data sources, the validation and the app are all in the repository, ready to run. Thanks for watching.

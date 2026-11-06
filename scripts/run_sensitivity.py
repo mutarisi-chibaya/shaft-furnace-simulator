@@ -24,6 +24,7 @@ from typing import Any
 import numpy as np
 import yaml
 
+from shaftsim import coupled as cp
 from shaftsim import emissions as em
 from shaftsim import energy as en
 from shaftsim import operating as op
@@ -62,6 +63,10 @@ def solve(args: tuple[str, float, int]) -> dict[str, Any]:
         sol = en.solve_thermal(
             prob, tol_T=uq.TOL_T_RETRY, species_tol=1e-8, T_start=(sol.Ts, sol.Tg)
         )
+    method = "alternating"
+    if not sol.converged:  # cooling front balanced in the cone: coupled finish (Milestone 8)
+        sol, _, start = cp.rescue(prob, sol)
+        method = f"coupled ({start})"
     data = em.load_emissions(DATA / "emissions.yaml", DATA / "grid_intensity.yaml")
     d = em.furnace_energy_demand(case, sol, base.species, data)
     s = sol.species
@@ -69,6 +74,7 @@ def solve(args: tuple[str, float, int]) -> dict[str, Any]:
         "input": key,
         "value": value,
         "converged": bool(sol.converged),
+        "method": method,
         "metallization": s.metallization,
         "h2_consumption_kg_per_t": s.h2_consumption,
         "top_gas_T_C": sol.T_top_gas - 273.15,

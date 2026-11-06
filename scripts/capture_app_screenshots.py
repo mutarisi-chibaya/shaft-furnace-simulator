@@ -45,17 +45,11 @@ def main() -> None:
 
         page.screenshot(path=str(OUT / "01_overview.png"))
         page.locator('[data-testid="stSidebar"]').screenshot(path=str(OUT / "02_sidebar.png"))
-        page.locator('[data-testid="stHorizontalBlock"]').nth(0).screenshot(
-            path=str(OUT / "03_kpis.png")
-        )
-        page.locator('[data-testid="stHorizontalBlock"]').nth(1).screenshot(
-            path=str(OUT / "04_profiles.png")
-        )
+        page.locator(".st-key-kpis").screenshot(path=str(OUT / "03_kpis.png"))
+        page.locator(".st-key-profiles").screenshot(path=str(OUT / "04_profiles.png"))
         co2 = page.get_by_text("CO₂ per tonne of DRI and the electricity grid")
         co2.scroll_into_view_if_needed()
-        page.locator('[data-testid="stHorizontalBlock"]').nth(2).screenshot(
-            path=str(OUT / "05_co2.png")
-        )
+        page.locator(".st-key-co2").screenshot(path=str(OUT / "05_co2.png"))
         page.get_by_text("Assumptions and limits", exact=True).click()
         page.wait_for_timeout(800)
         page.locator('[data-testid="stExpander"]').nth(0).screenshot(

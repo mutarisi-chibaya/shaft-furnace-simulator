@@ -1,8 +1,22 @@
-# Milestone 8 handoff (numerics and pressure) — work in progress
+# Milestone 8 handoff (numerics and pressure) — complete
 
-Status on 2026-11-06: **step 1 of 5 in progress.** Read `CLAUDE.md`, then `PLAN.md`
-(Milestone 8, approved by the user), then this file. The user approved the plan, so no
-re-approval is needed to continue it; a change of plan does need approval.
+**Status 2026-11-06: Milestone 8 is complete (all five steps).** The results and their
+limitations are in `docs/validation.md`, Milestone 8 (and the updated Milestone 5 and 7
+sections). This file is kept as the working log of the milestone: what was tried, in which
+order, and why. Sections below are in the order they were written; later ones supersede
+earlier ones.
+
+## Step 5 (reruns): done
+- Grid study to 3200 cells (`scripts/run_grid_study.py`): converged case A metallisation
+  0.906, DRI 307 C, top gas 359.6 C (observed order 0.96).
+- Cases A-E on 50/100/200 cells, cooling sweep (both branches), sensitivities rerun; B and E on
+  200 cells and the whole 625-750 mol/s band now converge. Still unconverged: the 950 C
+  sensitivity endpoint on 200 cells and 2430 mol/s on 50 cells.
+- Lesson: the coupled finish from the end state of a cycling alternating run failed (625 mol/s);
+  `coupled.rescue` tries a converged neighbour, then the half-grid alternating start, then the
+  end state.
+- Cases D/E: D's 20 K DRI shift with local pressure is real (two mean-pressure paths agree);
+  E's was a comparison with an unconverged state (no effect).
 
 ## Session 2 update (2026-11-06): band solved — read this first
 
@@ -114,9 +128,8 @@ Comparison with REDUCTOR Table 1 (tests/data CSV, outputs), 100 cells, not tuned
 Upper shaft within -9 % to +13 %; cone 0.9-3.9x REDUCTOR (1-D plug flow through the mean
 cross-section of a converging cone; REDUCTOR is 2-D). Effect of local vs mean pressure on the
 solution: A-C negligible (metallisation <= 4e-4, DRI <= 0.3 K). **D and E: DRI changes by
-~20 K** (D 363 -> 343 C, E 236 -> 258 C; E metallisation 0.99974 -> 1.0): the fully
-metallised endpoints that were fragile in Milestone 7; likely sensitivity of the cooling
-front or a different solver end state, not a pressure effect. Check in step 5 (grids).
+~20 K** (D 363 -> 343 C, E 236 -> 258 C; E metallisation 0.99974 -> 1.0). Resolved in step 5:
+D's shift is a real model response; E's 236 C was an unconverged state (no pressure effect).
 
 ## Step 3 committed (fbe39ba). Step 4 (Shao et al. 2021 gas loop): done, not committed
 

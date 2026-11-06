@@ -242,7 +242,7 @@ def run_one(prob: en.ThermalProblem) -> RunResult:
     if not sol.converged:  # alternating scheme cycles: coupled finish (Milestone 8)
         from . import coupled as cp
 
-        sol, _ = cp.finish_coupled(prob, sol)
+        sol = cp.rescue(prob, sol)[0]
     s = sol.species
     return RunResult(
         outputs={

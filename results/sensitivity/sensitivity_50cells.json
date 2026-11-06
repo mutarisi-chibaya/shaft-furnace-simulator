@@ -3,216 +3,252 @@
   "input": "bustle_temperature",
   "value": 1088.15,
   "converged": true,
+  "method": "alternating",
   "metallization": 0.7197173581856728,
   "h2_consumption_kg_per_t": 38.29943555998855,
   "top_gas_T_C": 346.85845326685467,
   "dri_T_C": 211.52950897242937,
   "electrolysis_GJ_per_t": 7.6651203842444335,
   "heating_GJ_per_t": 2.1163689633998297,
-  "co2_south_africa_t_per_t": 1.8992307043768266
+  "compression_GJ_per_t": 0.19115335629286154,
+  "co2_south_africa_t_per_t": 1.9363461487241154
  },
  {
   "input": "bustle_temperature",
   "value": 1115.15,
   "converged": true,
+  "method": "alternating",
   "metallization": 0.8061809374135486,
   "h2_consumption_kg_per_t": 42.22110040137451,
   "top_gas_T_C": 352.7306976520458,
   "dri_T_C": 224.69371850250872,
   "electrolysis_GJ_per_t": 8.449989212632234,
   "heating_GJ_per_t": 2.2483642804507427,
-  "co2_south_africa_t_per_t": 2.0772543646672506
+  "compression_GJ_per_t": 0.1957160790727735,
+  "co2_south_africa_t_per_t": 2.115255733733279
  },
  {
   "input": "bustle_temperature",
   "value": 1142.15,
   "converged": true,
+  "method": "alternating",
   "metallization": 0.8812237423745487,
   "h2_consumption_kg_per_t": 45.728549461779075,
   "top_gas_T_C": 358.0049205672914,
   "dri_T_C": 252.57588705707758,
   "electrolysis_GJ_per_t": 9.151958285975256,
   "heating_GJ_per_t": 2.3787296403831544,
-  "co2_south_africa_t_per_t": 2.238865245771722
+  "compression_GJ_per_t": 0.1997968759727026,
+  "co2_south_africa_t_per_t": 2.2776589660324627
  },
  {
   "input": "bustle_temperature",
   "value": 1169.15,
   "converged": true,
+  "method": "alternating",
   "metallization": 0.9702863228601507,
   "h2_consumption_kg_per_t": 50.08589525229046,
   "top_gas_T_C": 364.8518947568349,
   "dri_T_C": 266.9498134376902,
   "electrolysis_GJ_per_t": 10.024022836058158,
   "heating_GJ_per_t": 2.525012661429097,
-  "co2_south_africa_t_per_t": 2.436593516598011
+  "compression_GJ_per_t": 0.20486649862084647,
+  "co2_south_africa_t_per_t": 2.4763715841959266
  },
  {
   "input": "bustle_temperature",
   "value": 1196.15,
   "converged": true,
+  "method": "alternating",
   "metallization": 1.0,
   "h2_consumption_kg_per_t": 51.58923636661992,
   "top_gas_T_C": 367.2019688154809,
   "dri_T_C": 341.07606070729923,
   "electrolysis_GJ_per_t": 10.324896476920843,
   "heating_GJ_per_t": 2.633558152536758,
-  "co2_south_africa_t_per_t": 2.5160887098923386
+  "compression_GJ_per_t": 0.20661558453862863,
+  "co2_south_africa_t_per_t": 2.556206390156749
  },
  {
   "input": "bustle_temperature",
   "value": 1223.15,
   "converged": true,
+  "method": "alternating",
   "metallization": 1.0,
   "h2_consumption_kg_per_t": 51.58923636661998,
   "top_gas_T_C": 367.86942769593645,
   "dri_T_C": 433.51267752734566,
   "electrolysis_GJ_per_t": 10.324896476920854,
   "heating_GJ_per_t": 2.7208780789991764,
-  "co2_south_africa_t_per_t": 2.5330432532698577
+  "compression_GJ_per_t": 0.20661558453862863,
+  "co2_south_africa_t_per_t": 2.5731609335342682
  },
  {
   "input": "bustle_flow",
   "value": 2000.0,
   "converged": true,
-  "metallization": 0.7810774215224826,
-  "h2_consumption_kg_per_t": 41.07954383197062,
-  "top_gas_T_C": 328.19536631624374,
-  "dri_T_C": 263.1593629040967,
-  "electrolysis_GJ_per_t": 8.221521915347903,
-  "heating_GJ_per_t": 2.067580851064034,
-  "co2_south_africa_t_per_t": 1.9977918699225872
+  "method": "alternating",
+  "metallization": 0.7810774074881074,
+  "h2_consumption_kg_per_t": 41.07954319810271,
+  "top_gas_T_C": 328.1953697580043,
+  "dri_T_C": 263.1593578442993,
+  "electrolysis_GJ_per_t": 8.22152178848771,
+  "heating_GJ_per_t": 2.0675808432198894,
+  "compression_GJ_per_t": 0.17360329758329487,
+  "co2_south_africa_t_per_t": 2.0314996669255097
  },
  {
   "input": "bustle_flow",
   "value": 2086.0,
   "converged": true,
+  "method": "alternating",
   "metallization": 0.8227912653095906,
   "h2_consumption_kg_per_t": 42.98505260605613,
   "top_gas_T_C": 338.53215107421545,
   "dri_T_C": 269.5502991345869,
   "electrolysis_GJ_per_t": 8.602884040743252,
   "heating_GJ_per_t": 2.181081560226845,
-  "co2_south_africa_t_per_t": 2.09387730808484
+  "compression_GJ_per_t": 0.18160945521104366,
+  "co2_south_africa_t_per_t": 2.129139653243456
  },
  {
   "input": "bustle_flow",
   "value": 2172.0,
   "converged": true,
+  "method": "alternating",
   "metallization": 0.8700541435586181,
   "h2_consumption_kg_per_t": 45.19725370933495,
   "top_gas_T_C": 348.6185770698221,
   "dri_T_C": 271.24952566278614,
   "electrolysis_GJ_per_t": 9.045626538716391,
   "heating_GJ_per_t": 2.3007319451491623,
-  "co2_south_africa_t_per_t": 2.2030747721065422
+  "compression_GJ_per_t": 0.19009206742130724,
+  "co2_south_africa_t_per_t": 2.2399841504510545
  },
  {
   "input": "bustle_flow",
   "value": 2258.0,
   "converged": true,
+  "method": "alternating",
   "metallization": 0.9199849415900487,
   "h2_consumption_kg_per_t": 47.59813064269834,
   "top_gas_T_C": 358.3578443113041,
   "dri_T_C": 270.09069956465385,
   "electrolysis_GJ_per_t": 9.52612998355597,
   "heating_GJ_per_t": 2.4253727446666304,
-  "co2_south_africa_t_per_t": 2.320573088427524
+  "compression_GJ_per_t": 0.1989486937477542,
+  "co2_south_africa_t_per_t": 2.359202120708012
  },
  {
   "input": "bustle_flow",
   "value": 2344.0,
   "converged": true,
+  "method": "alternating",
   "metallization": 0.9735313869578746,
   "h2_consumption_kg_per_t": 50.24883760453765,
   "top_gas_T_C": 367.77588927875604,
   "dri_T_C": 265.1562489099248,
   "electrolysis_GJ_per_t": 10.056633571109602,
   "heating_GJ_per_t": 2.5561921105488152,
-  "co2_south_africa_t_per_t": 2.448979388739752
+  "compression_GJ_per_t": 0.2082717863758426,
+  "co2_south_africa_t_per_t": 2.4894186467588466
  },
  {
   "input": "bustle_flow",
   "value": 2430.0,
   "converged": false,
+  "method": "coupled (end_state)",
   "metallization": 1.0,
-  "h2_consumption_kg_per_t": 51.589236366619936,
-  "top_gas_T_C": 379.97752920332334,
-  "dri_T_C": 260.43374887434766,
-  "electrolysis_GJ_per_t": 10.324896476920845,
+  "h2_consumption_kg_per_t": 51.5894425254937,
+  "top_gas_T_C": 379.9771367841814,
+  "dri_T_C": 260.4357199109686,
+  "electrolysis_GJ_per_t": 10.32493773686535,
   "heating_GJ_per_t": 2.670131125012562,
-  "co2_south_africa_t_per_t": 2.5231899303514815
+  "compression_GJ_per_t": 0.21618880305848978,
+  "co2_south_africa_t_per_t": 2.565174413518508
  },
  {
   "input": "pellet_diameter",
   "value": 0.01,
   "converged": true,
+  "method": "alternating",
   "metallization": 0.9541963182753949,
   "h2_consumption_kg_per_t": 49.28240816843786,
   "top_gas_T_C": 363.5295381937632,
   "dri_T_C": 260.3228133024659,
   "electrolysis_GJ_per_t": 9.863215630028476,
   "heating_GJ_per_t": 2.494455431481198,
-  "co2_south_africa_t_per_t": 2.3994370877948747
+  "compression_GJ_per_t": 0.20393166890715692,
+  "co2_south_africa_t_per_t": 2.439033643433568
  },
  {
   "input": "pellet_diameter",
   "value": 0.011,
   "converged": true,
+  "method": "alternating",
   "metallization": 0.9525540999060027,
   "h2_consumption_kg_per_t": 49.20081286755143,
   "top_gas_T_C": 363.42449734380784,
   "dri_T_C": 261.8599433562233,
   "electrolysis_GJ_per_t": 9.846885420589656,
   "heating_GJ_per_t": 2.493294223981993,
-  "co2_south_africa_t_per_t": 2.39604085283197
+  "compression_GJ_per_t": 0.20383673556809145,
+  "co2_south_africa_t_per_t": 2.435618975662937
  },
  {
   "input": "pellet_diameter",
   "value": 0.012,
   "converged": true,
+  "method": "alternating",
   "metallization": 0.9508683791442942,
   "h2_consumption_kg_per_t": 49.11713508100747,
   "top_gas_T_C": 363.3149774215186,
   "dri_T_C": 263.44020931202556,
   "electrolysis_GJ_per_t": 9.83013842946646,
   "heating_GJ_per_t": 2.492103379997155,
-  "co2_south_africa_t_per_t": 2.3925579387279505
+  "compression_GJ_per_t": 0.20373937932826,
+  "co2_south_africa_t_per_t": 2.4321171583067254
  },
  {
   "input": "pellet_diameter",
   "value": 0.013,
   "converged": true,
+  "method": "alternating",
   "metallization": 0.9491329523181868,
   "h2_consumption_kg_per_t": 49.03107338772195,
   "top_gas_T_C": 363.20445837525654,
   "dri_T_C": 265.0506801317033,
   "electrolysis_GJ_per_t": 9.812914331255609,
   "heating_GJ_per_t": 2.4908786099117233,
-  "co2_south_africa_t_per_t": 2.3889757994561083
+  "compression_GJ_per_t": 0.20363924949455064,
+  "co2_south_africa_t_per_t": 2.428515577245617
  },
  {
   "input": "pellet_diameter",
   "value": 0.013999999999999999,
   "converged": true,
+  "method": "alternating",
   "metallization": 0.9473624307443512,
   "h2_consumption_kg_per_t": 48.943358439367366,
   "top_gas_T_C": 363.0935432866745,
   "dri_T_C": 266.6790212018169,
   "electrolysis_GJ_per_t": 9.795359356128557,
   "heating_GJ_per_t": 2.489630311851478,
-  "co2_south_africa_t_per_t": 2.385324846875078
+  "compression_GJ_per_t": 0.2035371961551698,
+  "co2_south_africa_t_per_t": 2.424844809396303
  },
  {
   "input": "pellet_diameter",
   "value": 0.015,
   "converged": true,
+  "method": "alternating",
   "metallization": 0.9455662285834469,
   "h2_consumption_kg_per_t": 48.8544610193857,
   "top_gas_T_C": 362.98308184912264,
   "dri_T_C": 268.3151570758333,
   "electrolysis_GJ_per_t": 9.777567725102017,
   "heating_GJ_per_t": 2.4883651856785085,
-  "co2_south_africa_t_per_t": 2.3816246763680295
+  "compression_GJ_per_t": 0.2034337670505341,
+  "co2_south_africa_t_per_t": 2.42112455649441
  }
 ]

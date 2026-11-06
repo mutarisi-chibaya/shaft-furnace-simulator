@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 700" width="900" height="700" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" role="img" aria-labelledby="t d">
+  <title id="t">Hydrogen shaft furnace, schematic</title>
+  <desc id="d">Iron ore pellets enter at the top and move down. Hot hydrogen enters at the bustle and cold gas at the bottom of the cone; both flow up and leave at the top as water vapour and unused hydrogen. Iron (DRI) leaves at the bottom. Heights to scale (15 m cylinder above a 10 m cone, bustle 10.1 m below the top); widths doubled.</desc>
+  <defs>
+    <marker id="a-grey" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#52514e"/></marker>
+    <marker id="a-hot" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#d9531e"/></marker>
+    <marker id="a-cold" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2a78d6"/></marker>
+  </defs>
+  <rect x="0" y="0" width="900" height="700" rx="16" fill="#ffffff"/>
+
+  <!-- shaft: 15 m cylinder (y 70-400) and 10 m cone (y 400-620), 22 px per m -->
+  <path d="M360,70 L540,70 L540,400 L495,620 L405,620 L360,400 Z" fill="#f3f2ee" stroke="#52514e" stroke-width="3" stroke-linejoin="round"/>
+  <line x1="360" y1="292" x2="540" y2="292" stroke="#d9531e" stroke-width="1.5" stroke-dasharray="6 5"/>
+  <line x1="360" y1="400" x2="540" y2="400" stroke="#8a8984" stroke-width="1.5" stroke-dasharray="6 5"/>
+
+  <!-- flows inside the cylinder: pellets down (left), gas up (right) -->
+  <line x1="378" y1="92" x2="378" y2="384" stroke="#52514e" stroke-width="3" marker-end="url(#a-grey)"/>
+  <line x1="522" y1="384" x2="522" y2="92" stroke="#2a78d6" stroke-width="3" marker-end="url(#a-cold)"/>
+
+  <!-- zone labels -->
+  <text x="450" y="160" text-anchor="middle" font-size="16" font-weight="700" fill="#1f1e1c">Reduction</text>
+  <text x="450" y="180" text-anchor="middle" font-size="16" font-weight="700" fill="#1f1e1c">zone</text>
+  <text x="450" y="210" text-anchor="middle" font-size="14" fill="#52514e">Fe₂O₃ → Fe₃O₄</text>
+  <text x="450" y="230" text-anchor="middle" font-size="14" fill="#52514e">→ FeO → Fe</text>
+  <text x="450" y="480" text-anchor="middle" font-size="16" font-weight="700" fill="#1f1e1c">Cooling</text>
+  <text x="450" y="500" text-anchor="middle" font-size="16" font-weight="700" fill="#1f1e1c">zone</text>
+  <text x="450" y="522" text-anchor="middle" font-size="14" fill="#52514e">(cone)</text>
+
+  <!-- pellets in (top left) -->
+  <line x1="410" y1="18" x2="410" y2="64" stroke="#52514e" stroke-width="3" marker-end="url(#a-grey)"/>
+  <text x="396" y="32" text-anchor="end" font-size="16" font-weight="700" fill="#1f1e1c">Iron ore pellets in</text>
+  <text x="396" y="52" text-anchor="end" font-size="14" fill="#52514e">20 °C, move down slowly</text>
+
+  <!-- used gas out (top right) -->
+  <line x1="490" y1="64" x2="490" y2="18" stroke="#2a78d6" stroke-width="3" marker-end="url(#a-cold)"/>
+  <text x="506" y="32" font-size="16" font-weight="700" fill="#1f1e1c">Used gas out</text>
+  <text x="506" y="52" font-size="14" fill="#52514e">water vapour + unused H₂, recycled</text>
+
+  <!-- hot hydrogen at the bustle (both sides) -->
+  <line x1="236" y1="292" x2="354" y2="292" stroke="#d9531e" stroke-width="4" marker-end="url(#a-hot)"/>
+  <line x1="664" y1="292" x2="546" y2="292" stroke="#d9531e" stroke-width="4" marker-end="url(#a-hot)"/>
+  <text x="226" y="286" text-anchor="end" font-size="16" font-weight="700" fill="#d9531e">Hot hydrogen in</text>
+  <text x="226" y="306" text-anchor="end" font-size="14" fill="#52514e">890 °C, at the bustle</text>
+  <text x="674" y="286" font-size="14" fill="#52514e">ring of inlets</text>
+  <text x="674" y="304" font-size="14" fill="#52514e">around the shaft</text>
+
+  <!-- cold gas in at the bottom of the cone -->
+  <line x1="640" y1="598" x2="506" y2="598" stroke="#2a78d6" stroke-width="4" marker-end="url(#a-cold)"/>
+  <text x="650" y="592" font-size="16" font-weight="700" fill="#2a78d6">Cold gas in</text>
+  <text x="650" y="612" font-size="14" fill="#52514e">70 °C, cools the iron</text>
+
+  <!-- iron out -->
+  <line x1="450" y1="624" x2="450" y2="676" stroke="#52514e" stroke-width="4" marker-end="url(#a-grey)"/>
+  <text x="466" y="660" font-size="16" font-weight="700" fill="#1f1e1c">Iron out</text>
+  <text x="466" y="680" font-size="14" fill="#52514e">direct reduced iron (DRI), melted into steel later</text>
+
+  <!-- scale note -->
+  <text x="24" y="680" font-size="12" fill="#8a8984">Heights to scale (25 m); widths doubled.</text>
+</svg>

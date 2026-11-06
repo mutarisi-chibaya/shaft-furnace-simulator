@@ -17,7 +17,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-app = ["streamlit>=1.30", "plotly>=5.18"]
+app = ["streamlit>=1.39", "plotly>=5.18"]
 uq = ["SALib>=1.4"]
 notebook = ["nbformat>=5.9", "nbconvert>=7.0", "ipykernel>=6.25"]
 # screenshots and the demo video (scripts/capture_app_screenshots.py, record_demo.py); uses a

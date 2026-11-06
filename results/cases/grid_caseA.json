@@ -1,0 +1,86 @@
+[
+ {
+  "cells": 50,
+  "converged": true,
+  "iterations": 79,
+  "seconds": 68.1345011999947,
+  "metallization": 0.9455662224823246,
+  "dri_T_C": 268.31527561540656,
+  "top_gas_T_C": 362.9830670143318,
+  "gud": 0.3164872774748157,
+  "h2_consumption_kg_per_t": 48.85445987984126,
+  "energy_closure": 1.981335041481863e-11
+ },
+ {
+  "cells": 100,
+  "converged": true,
+  "iterations": 45,
+  "seconds": 48.070073499984574,
+  "metallization": 0.936661813338236,
+  "dri_T_C": 278.8320001398205,
+  "top_gas_T_C": 361.89511678960423,
+  "gud": 0.3145678736381605,
+  "h2_consumption_kg_per_t": 48.41509485779298,
+  "energy_closure": 1.4974266464236092e-16
+ },
+ {
+  "cells": 200,
+  "converged": true,
+  "iterations": 40,
+  "seconds": 49.69108739995863,
+  "metallization": 0.9237303118513216,
+  "dri_T_C": 291.0013784968023,
+  "top_gas_T_C": 360.9190690571079,
+  "gud": 0.31178040297700277,
+  "h2_consumption_kg_per_t": 47.780940748001655,
+  "energy_closure": 0.0
+ },
+ {
+  "cells": 400,
+  "converged": true,
+  "iterations": 41,
+  "seconds": 58.01752789999591,
+  "metallization": 0.9157312933937906,
+  "dri_T_C": 298.3478133091861,
+  "top_gas_T_C": 360.3203226606506,
+  "gud": 0.3100561616031293,
+  "h2_consumption_kg_per_t": 47.390976359818744,
+  "energy_closure": 0.0
+ },
+ {
+  "cells": 800,
+  "converged": true,
+  "iterations": 28,
+  "seconds": 58.93128269998124,
+  "metallization": 0.9111746659287511,
+  "dri_T_C": 302.4808317902315,
+  "top_gas_T_C": 359.97919819027993,
+  "gud": 0.3090739503831892,
+  "h2_consumption_kg_per_t": 47.16961526202972,
+  "energy_closure": 1.4974266464236092e-16
+ },
+ {
+  "cells": 1600,
+  "converged": true,
+  "iterations": 41,
+  "seconds": 121.07598379999399,
+  "metallization": 0.9087541620884383,
+  "dri_T_C": 304.6597152612636,
+  "top_gas_T_C": 359.7983377984698,
+  "gud": 0.3085521947513855,
+  "h2_consumption_kg_per_t": 47.05225682538531,
+  "energy_closure": -1.4974266464236092e-16
+ },
+ {
+  "cells": 3200,
+  "converged": true,
+  "iterations": 28,
+  "seconds": 140.46568189997924,
+  "metallization": 0.9075103590255246,
+  "dri_T_C": 305.77531816110945,
+  "top_gas_T_C": 359.70540676490486,
+  "gud": 0.30828408476437663,
+  "h2_consumption_kg_per_t": 46.99201272636701,
+  "energy_closure": -2.9948532928472184e-16
+ }
+]

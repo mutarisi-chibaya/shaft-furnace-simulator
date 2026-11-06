@@ -492,3 +492,38 @@ def finish_coupled(
         max_retries=30,
     )
     return thermal_solution(sprob, y, stats), stats
+
+
+def rescue(
+    prob: en.ThermalProblem,
+    end_state: en.ThermalSolution,
+    neighbour: en.ThermalSolution | None = None,
+    smoothing: tuple[float, float] = DEFAULT_SMOOTHING,
+) -> tuple[en.ThermalSolution, CoupledStats, str]:
+    """Coupled solve where the alternating solver failed, from the most reliable start.
+
+    The coupled solver converges from good starts only (it is a finisher). The end state of
+    a cycling alternating iteration can be far from the solution (e.g. fully reduced and
+    cold), so it is tried last. Starts, in order: ``neighbour`` (a converged solution of a
+    nearby operating point, e.g. in a continuation), the alternating solution on half the
+    cells (:func:`solve_thermal_coupled`; the cooling front is smeared there and the
+    alternating solver converges), then ``end_state``.
+
+    Returns:
+        (solution, stats, name of the start that was used: "neighbour", "coarse" or
+        "end_state"); if none converges, the result of the last attempt.
+    """
+    tries: list[str] = (["neighbour"] if neighbour is not None else []) + ["coarse", "end_state"]
+    out: tuple[en.ThermalSolution, CoupledStats] | None = None
+    for name in tries:
+        if name == "neighbour":
+            assert neighbour is not None
+            out = finish_coupled(prob, neighbour, smoothing)
+        elif name == "coarse":
+            out = solve_thermal_coupled(prob, smoothing)
+        else:
+            out = finish_coupled(prob, end_state, smoothing)
+        if out[0].converged:
+            return out[0], out[1], name
+    assert out is not None
+    return out[0], out[1], tries[-1]

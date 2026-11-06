@@ -131,7 +131,7 @@ def run_scenario(base: BaseModel, oc: op.OperatingConditions, n_cells: int = 50)
             T_start=(sol.Ts, sol.Tg),
         )
     if not sol.converged:  # Milestone 7 band: finish with the coupled solver (Milestone 8)
-        sol, _ = cp.finish_coupled(prob, sol)
+        sol = cp.rescue(prob, sol)[0]
     s = sol.species
     sprob = prob.species_problem(sol.Ts, sol.Tg)
     closure = sh.element_balances(sprob, s)

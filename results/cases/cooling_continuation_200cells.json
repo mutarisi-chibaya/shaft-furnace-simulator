@@ -3,260 +3,286 @@
   "direction": "up",
   "cooling_flow": 500.0,
   "converged": true,
+  "method": "alternating",
   "outer_iterations": 23,
   "metallization": 0.9237149746125657,
   "dri_T_C": 291.01537727536675,
   "top_gas_T_C": 360.917958419456,
-  "seconds": 113.01594700000715
+  "seconds": 302.8848171000136
  },
  {
   "direction": "up",
   "cooling_flow": 525.0,
   "converged": true,
+  "method": "alternating",
   "outer_iterations": 23,
   "metallization": 0.9317396150081994,
   "dri_T_C": 251.37569752706838,
   "top_gas_T_C": 361.51891686766055,
-  "seconds": 63.25318350002635
+  "seconds": 105.7604615999735
  },
  {
   "direction": "up",
   "cooling_flow": 550.0,
   "converged": true,
+  "method": "alternating",
   "outer_iterations": 24,
   "metallization": 0.9397183595065138,
   "dri_T_C": 210.17429754851634,
   "top_gas_T_C": 362.11697455499393,
-  "seconds": 56.472910700016655
+  "seconds": 118.20993949996773
  },
  {
   "direction": "up",
   "cooling_flow": 575.0,
   "converged": true,
+  "method": "alternating",
   "outer_iterations": 27,
   "metallization": 0.9476671421171367,
   "dri_T_C": 167.22449764072883,
   "top_gas_T_C": 362.7116326432614,
-  "seconds": 58.26538460003212
+  "seconds": 236.61699209996732
  },
  {
   "direction": "up",
   "cooling_flow": 600.0,
   "converged": true,
+  "method": "alternating",
   "outer_iterations": 34,
   "metallization": 0.9555914208194379,
   "dri_T_C": 122.3215103302947,
   "top_gas_T_C": 363.29769074106787,
-  "seconds": 58.86387210001703
+  "seconds": 237.22897180001019
  },
  {
   "direction": "up",
   "cooling_flow": 625.0,
-  "converged": false,
-  "outer_iterations": 150,
-  "metallization": 1.0,
-  "dri_T_C": 264.34454090894087,
-  "top_gas_T_C": 324.9258401747861,
-  "seconds": 123.28415380005026
+  "converged": true,
+  "method": "coupled (neighbour)",
+  "outer_iterations": 181,
+  "metallization": 0.9622623708573239,
+  "dri_T_C": 76.69167100776247,
+  "top_gas_T_C": 363.79814455089866,
+  "seconds": 659.5283726999769
  },
  {
   "direction": "up",
   "cooling_flow": 650.0,
-  "converged": false,
-  "outer_iterations": 150,
-  "metallization": 1.0,
-  "dri_T_C": 69.96709518260946,
-  "top_gas_T_C": 351.92628951692416,
-  "seconds": 110.75361330003943
+  "converged": true,
+  "method": "coupled (neighbour)",
+  "outer_iterations": 49,
+  "metallization": 0.938266666578041,
+  "dri_T_C": 70.0095372889399,
+  "top_gas_T_C": 362.00797779525817,
+  "seconds": 482.52843829995254
  },
  {
   "direction": "up",
   "cooling_flow": 675.0,
-  "converged": false,
-  "outer_iterations": 150,
-  "metallization": 0.9143991693506136,
-  "dri_T_C": 91.70319625689774,
-  "top_gas_T_C": 354.8795999787691,
-  "seconds": 99.91132419998758
+  "converged": true,
+  "method": "coupled (neighbour)",
+  "outer_iterations": 47,
+  "metallization": 0.9091958412726568,
+  "dri_T_C": 70.0005623463133,
+  "top_gas_T_C": 359.83142988081374,
+  "seconds": 396.27793659997405
  },
  {
   "direction": "up",
   "cooling_flow": 700.0,
-  "converged": false,
-  "outer_iterations": 150,
-  "metallization": 1.0,
-  "dri_T_C": 137.3561996301978,
-  "top_gas_T_C": 326.23880815405516,
-  "seconds": 140.60353389999364
+  "converged": true,
+  "method": "coupled (neighbour)",
+  "outer_iterations": 63,
+  "metallization": 0.880069080208708,
+  "dri_T_C": 70.00003547900292,
+  "top_gas_T_C": 357.6557974954658,
+  "seconds": 285.59186659997795
  },
  {
   "direction": "up",
   "cooling_flow": 725.0,
-  "converged": false,
-  "outer_iterations": 150,
-  "metallization": 0.6748078024653287,
-  "dri_T_C": 188.95271608868308,
-  "top_gas_T_C": 359.27020923224256,
-  "seconds": 116.88570490002166
+  "converged": true,
+  "method": "coupled (coarse)",
+  "outer_iterations": 162,
+  "metallization": 0.8506493107125687,
+  "dri_T_C": 69.99997009821584,
+  "top_gas_T_C": 355.5215403354066,
+  "seconds": 386.28194970003096
  },
  {
   "direction": "up",
   "cooling_flow": 750.0,
-  "converged": false,
-  "outer_iterations": 150,
-  "metallization": 1.0,
-  "dri_T_C": 85.70266882174894,
-  "top_gas_T_C": 321.39297205633613,
-  "seconds": 83.24168249999639
+  "converged": true,
+  "method": "alternating",
+  "outer_iterations": 141,
+  "metallization": 0.820413938623777,
+  "dri_T_C": 69.99995730277851,
+  "top_gas_T_C": 353.51470306629903,
+  "seconds": 83.95903139997972
  },
  {
   "direction": "up",
   "cooling_flow": 775.0,
   "converged": true,
-  "outer_iterations": 54,
-  "metallization": 0.7901632145303579,
-  "dri_T_C": 69.99995345924998,
-  "top_gas_T_C": 351.50535359157186,
-  "seconds": 23.645999300002586
+  "method": "alternating",
+  "outer_iterations": 77,
+  "metallization": 0.7901632324679184,
+  "dri_T_C": 69.99995345925186,
+  "top_gas_T_C": 351.505350637951,
+  "seconds": 28.546190799970645
  },
  {
   "direction": "up",
   "cooling_flow": 800.0,
   "converged": true,
+  "method": "alternating",
   "outer_iterations": 16,
-  "metallization": 0.7605115110803023,
-  "dri_T_C": 69.99995205390951,
-  "top_gas_T_C": 349.51923700497684,
-  "seconds": 7.827669200021774
+  "metallization": 0.7605115110943291,
+  "dri_T_C": 69.99995205390809,
+  "top_gas_T_C": 349.5192370027694,
+  "seconds": 12.446622899966314
  },
  {
   "direction": "down",
   "cooling_flow": 800.0,
   "converged": true,
+  "method": "alternating",
   "outer_iterations": 19,
   "metallization": 0.7605114591440286,
   "dri_T_C": 69.99995205389365,
   "top_gas_T_C": 349.5192456006855,
-  "seconds": 14.606804600043688
+  "seconds": 21.59270129998913
  },
  {
   "direction": "down",
   "cooling_flow": 775.0,
   "converged": true,
+  "method": "alternating",
   "outer_iterations": 28,
   "metallization": 0.7901631164450984,
   "dri_T_C": 69.99995345922366,
   "top_gas_T_C": 351.50536975560135,
-  "seconds": 11.010478000040166
+  "seconds": 16.087806699972134
  },
  {
   "direction": "down",
   "cooling_flow": 750.0,
-  "converged": false,
-  "outer_iterations": 150,
-  "metallization": 1.0,
-  "dri_T_C": 70.00000000000131,
-  "top_gas_T_C": 324.1602827246728,
-  "seconds": 105.42496789997676
+  "converged": true,
+  "method": "coupled (neighbour)",
+  "outer_iterations": 186,
+  "metallization": 0.8204148777257507,
+  "dri_T_C": 69.99995733158636,
+  "top_gas_T_C": 353.51473869646304,
+  "seconds": 176.04269599996042
  },
  {
   "direction": "down",
   "cooling_flow": 725.0,
-  "converged": false,
-  "outer_iterations": 150,
-  "metallization": 1.0,
-  "dri_T_C": 114.91631754906854,
-  "top_gas_T_C": 323.0699777628055,
-  "seconds": 102.24480109999422
+  "converged": true,
+  "method": "coupled (coarse)",
+  "outer_iterations": 162,
+  "metallization": 0.8506493107125687,
+  "dri_T_C": 69.99997009821584,
+  "top_gas_T_C": 355.5215403354066,
+  "seconds": 251.90658459998667
  },
  {
   "direction": "down",
   "cooling_flow": 700.0,
-  "converged": false,
-  "outer_iterations": 150,
-  "metallization": 0.9277342848475336,
-  "dri_T_C": 69.99915562218177,
-  "top_gas_T_C": 349.8454840800098,
-  "seconds": 109.90137079998385
+  "converged": true,
+  "method": "coupled (coarse)",
+  "outer_iterations": 115,
+  "metallization": 0.880069080737121,
+  "dri_T_C": 70.00003547900047,
+  "top_gas_T_C": 357.6557974087277,
+  "seconds": 224.20964219997404
  },
  {
   "direction": "down",
   "cooling_flow": 675.0,
-  "converged": false,
-  "outer_iterations": 150,
-  "metallization": 1.0,
-  "dri_T_C": 69.99973978989397,
-  "top_gas_T_C": 344.990772042416,
-  "seconds": 127.12756650004303
+  "converged": true,
+  "method": "coupled (neighbour)",
+  "outer_iterations": 55,
+  "metallization": 0.9091958412719814,
+  "dri_T_C": 70.00056234631387,
+  "top_gas_T_C": 359.8314298809256,
+  "seconds": 141.7032439999748
  },
  {
   "direction": "down",
   "cooling_flow": 650.0,
-  "converged": false,
-  "outer_iterations": 150,
-  "metallization": 0.9845048915640376,
-  "dri_T_C": -21.718498322753334,
-  "top_gas_T_C": 370.18789301591585,
-  "seconds": 130.01548549998552
+  "converged": true,
+  "method": "coupled (neighbour)",
+  "outer_iterations": 35,
+  "metallization": 0.9382666665773218,
+  "dri_T_C": 70.00953728894041,
+  "top_gas_T_C": 362.00797779537663,
+  "seconds": 135.86038720002398
  },
  {
   "direction": "down",
   "cooling_flow": 625.0,
-  "converged": false,
-  "outer_iterations": 150,
-  "metallization": 0.9464163364080799,
-  "dri_T_C": 6.657537045290326,
-  "top_gas_T_C": 378.9126616949154,
-  "seconds": 137.1596331000328
+  "converged": true,
+  "method": "coupled (neighbour)",
+  "outer_iterations": 78,
+  "metallization": 0.9622623708989277,
+  "dri_T_C": 76.69167098405586,
+  "top_gas_T_C": 363.7981445470432,
+  "seconds": 178.30369099997915
  },
  {
   "direction": "down",
   "cooling_flow": 600.0,
   "converged": true,
-  "outer_iterations": 45,
-  "metallization": 0.9555913348592319,
-  "dri_T_C": 122.32154665866761,
-  "top_gas_T_C": 363.29769719099943,
-  "seconds": 58.287589800020214
+  "method": "alternating",
+  "outer_iterations": 35,
+  "metallization": 0.9555914547667522,
+  "dri_T_C": 122.3215169267558,
+  "top_gas_T_C": 363.29768421186213,
+  "seconds": 53.37487679999322
  },
  {
   "direction": "down",
   "cooling_flow": 575.0,
   "converged": true,
-  "outer_iterations": 29,
-  "metallization": 0.9476672314634151,
-  "dri_T_C": 167.22450493702627,
-  "top_gas_T_C": 362.7116179417387,
-  "seconds": 57.33020460000262
+  "method": "alternating",
+  "outer_iterations": 30,
+  "metallization": 0.9476674369554396,
+  "dri_T_C": 167.2244488411199,
+  "top_gas_T_C": 362.711598577626,
+  "seconds": 69.24251900002128
  },
  {
   "direction": "down",
   "cooling_flow": 550.0,
   "converged": true,
-  "outer_iterations": 30,
-  "metallization": 0.9397183973773798,
-  "dri_T_C": 210.17428696017703,
-  "top_gas_T_C": 362.11697136981013,
-  "seconds": 67.61773419997189
+  "method": "alternating",
+  "outer_iterations": 31,
+  "metallization": 0.9397188535368038,
+  "dri_T_C": 210.17419331502418,
+  "top_gas_T_C": 362.1169260219182,
+  "seconds": 75.15639049996389
  },
  {
   "direction": "down",
   "cooling_flow": 525.0,
   "converged": true,
-  "outer_iterations": 28,
-  "metallization": 0.9317395236393093,
-  "dri_T_C": 251.37570972788853,
-  "top_gas_T_C": 361.51892663571016,
-  "seconds": 67.29342520004138
+  "method": "alternating",
+  "outer_iterations": 26,
+  "metallization": 0.9317398153427368,
+  "dri_T_C": 251.37565466737226,
+  "top_gas_T_C": 361.5188988886449,
+  "seconds": 67.78264499997022
  },
  {
   "direction": "down",
   "cooling_flow": 500.0,
   "converged": true,
+  "method": "alternating",
   "outer_iterations": 26,
-  "metallization": 0.9237153580629334,
-  "dri_T_C": 291.01534481996794,
-  "top_gas_T_C": 360.91791594172514,
-  "seconds": 67.59682710003108
+  "metallization": 0.9237152834989878,
+  "dri_T_C": 291.0153502263868,
+  "top_gas_T_C": 360.91792440139227,
+  "seconds": 73.79504429997178
  }
 ]

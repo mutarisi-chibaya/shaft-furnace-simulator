@@ -5,7 +5,9 @@ Usage:
 
 Case B operating conditions with the cooling gas flow stepped from 500 to 800 mol/s (bustle
 flow = 2800 - cooling flow), once upward and once downward. Each step starts from the last
-converged temperatures of the same direction. Results: results/cases/
+converged temperatures of the same direction. Where the alternating solver does not converge
+(the balanced cooling front, Milestone 7), the coupled solver finishes from its end state
+(Milestone 8); the record says which solver converged ("method"). Results: results/cases/
 cooling_continuation_<cells>cells.json (one record per step and direction; unconverged steps
 are kept with converged = false and are not solutions).
 """
@@ -23,6 +25,7 @@ from typing import Any
 
 import numpy as np
 
+from shaftsim import coupled as cp
 from shaftsim import energy as en
 from shaftsim import operating as op
 from shaftsim import uq
@@ -38,6 +41,7 @@ def sweep(cells: int, flows: np.ndarray, max_outer: int, direction: str) -> list
     b = op.load_cases(ROOT / "data" / "furnace_cases.yaml", base.case)["B"]
     total = b.bustle_flow + b.cooling_flow
     T: tuple[np.ndarray, np.ndarray] | None = None
+    last: en.ThermalSolution | None = None  # last converged solution of this direction
     out = []
     for cool in flows:
         oc = dataclasses.replace(b, cooling_flow=float(cool), bustle_flow=total - float(cool))
@@ -52,10 +56,15 @@ def sweep(cells: int, flows: np.ndarray, max_outer: int, direction: str) -> list
             T_start=T,
             max_outer=max_outer,
         )
+        method = "alternating"
+        if not sol.converged:
+            sol, _, start = cp.rescue(prob, sol, neighbour=last)
+            method = f"coupled ({start})"
         rec = {
             "direction": direction,
             "cooling_flow": float(cool),
             "converged": bool(sol.converged),
+            "method": method,
             "outer_iterations": sol.outer_iterations,
             "metallization": sol.species.metallization,
             "dri_T_C": sol.T_solid_out - 273.15,
@@ -66,6 +75,7 @@ def sweep(cells: int, flows: np.ndarray, max_outer: int, direction: str) -> list
         out.append(rec)
         if sol.converged:
             T = (sol.Ts, sol.Tg)
+            last = sol
     return out
 
 
