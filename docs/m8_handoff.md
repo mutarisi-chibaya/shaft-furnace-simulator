@@ -118,15 +118,30 @@ solution: A-C negligible (metallisation <= 4e-4, DRI <= 0.3 K). **D and E: DRI c
 metallised endpoints that were fragile in Milestone 7; likely sensitivity of the cooling
 front or a different solver end state, not a pressure effect. Check in step 5 (grids).
 
-## Step 4 (Shao et al. 2021 gas loop): waiting for the PDF
+## Step 3 committed (fbe39ba). Step 4 (Shao et al. 2021 gas loop): done, not committed
 
-Openly accessible as an accepted author manuscript (Abo Akademi repository, "Publisher rights
-policy"; DOI 10.1007/s11663-020-02020-6): https://research.abo.fi/files/33744529/Shao_etal_revised.pdf
-The repository returns HTTP 403 to scripts (also via the urn.fi handle); not bypassed.
-`scripts/fetch_references.py` lists it as `references/shao2021_mmtb52_451.pdf` and prints a
-manual-download instruction. **Needs the user** to save the PDF there by hand, then rerun the
-script (text layer for quotes). Then: read which gas-loop terms (heat recovery, compression)
-and constants it gives, propose how they enter `emissions.furnace_energy_demand`.
+Source: accepted author manuscript (Abo Akademi repository; DOI 10.1007/s11663-020-02020-6),
+downloaded by the user by hand (the repository returns HTTP 403 to scripts; not bypassed) and
+saved as `references/shao2021_mmtb52_451.pdf`; `scripts/fetch_references.py` extracts the text.
+
+What the paper gives (Sec. 2.D, Eqs. 11-15, constants lines 249-252): electrolysis
+n_fresh dH/eta_e (242 kJ/mol, 60 % -> 18.0 MJ/Nm3, the value already used: independent
+cross-check), compression W = n R T_m ln(P_feed/P_m)/eta_c (eta_c 70 %, P_m 1 atm), heating
+with eta_h 70 % from the mixer temperature. **No heat-recovery term** (the condenser only fixes
+the recycle temperature), so heat recovery stays out, as the plan says.
+
+Implemented: `emissions.compression_power`, `EnergyDemand.compression` (in `total`), the bustle
+and cooling gases compressed isothermally at the condenser temperature to the case pressures;
+`ThermalCase.pressures` / `OperatingConditions.pressures` (top, bustle, cooling from the YAML;
+None = keep the case's). Data: `data/emissions.yaml` `compression` (quotes "c = 70%",
+"Pm = 1.0 atm"), SOURCES row Shao2021-S2D. App text, plot_m7 note, run_sensitivity output
+name the term (`SHOW` unchanged until the results are rerun in step 5).
+
+Case A (50 cells) vs Marsigny thesis Table 20: electrolysis 9.78 / 9.73, heating 2.49 / 2.28,
+**compression 0.20 / 0.25 GJ/t (-19 %; isothermal = minimum work, the reference compressor
+model is not published)**, total 12.47 / 12.26 (+1.7 %). Cases B-E: compression 0.20-0.26.
+Tests: `test_compression_power_is_isothermal_work`; Table 20 test now compares the full total
+(5 %) and compression (25 %, a regression guard, stated as such).
 
 ## Goal (approved plan, short)
 

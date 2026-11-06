@@ -144,12 +144,16 @@ class ThermalCase:
         T_solid_in: Burden inlet temperature at the top [K].
         T_gas_in: Gas inlet temperature at the bottom [K] (side inlets carry their own T).
         gangue: Mass fractions of the gangue oxides in the fresh burden [-].
+        pressures: (top, bustle, cooling-gas inlet) pressures of the source data [Pa]
+            (Table 1 of Marsigny et al. 2025b; the last two are REDUCTOR outputs), used for
+            the gas compression energy (shaftsim.emissions); None if not known.
     """
 
     shaft: sh.ShaftCase
     T_solid_in: float
     T_gas_in: float
     gangue: Mapping[str, float]
+    pressures: tuple[float, float, float] | None = None
 
 
 def load_thermal_case(furnace_yaml: str | Path, kinetics_yaml: str | Path) -> ThermalCase:
@@ -220,6 +224,7 @@ def load_furnace_case(furnace_yaml: str | Path, kinetics_yaml: str | Path) -> Th
         T_solid_in=v("solid_inlet", "temperature"),
         T_gas_in=v("gas", "cooling_temperature"),
         gangue={k: v("gangue", k) for k in GANGUE},
+        pressures=(p_top, p_b, p_c),
     )
 
 

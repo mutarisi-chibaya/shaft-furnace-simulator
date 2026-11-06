@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import csv
+import math
 
 import numpy as np
 import pytest
@@ -67,10 +68,22 @@ def test_energy_demand_and_co2_arithmetic(data: em.EmissionsData) -> None:
         em.energy_demand(1.0, 0.0, 1.0, data)
 
 
+def test_compression_power_is_isothermal_work(data: em.EmissionsData) -> None:
+    """Shao et al. (2021), Eq. 12: n R T ln(p_out / p_in) / eta_c; zero at the inlet pressure."""
+    w = em.compression_power(10.0, 343.15, 2.0 * data.compressor_inlet_p, data)
+    assert w == pytest.approx(10.0 * pr.R_GAS * 343.15 * math.log(2.0) / 0.7, rel=1e-9)
+    assert em.compression_power(10.0, 343.15, data.compressor_inlet_p, data) == 0.0
+    d = em.energy_demand(2.0, 4.0, 7.0e6, data, compression_power=1.0e6)
+    assert d.compression == pytest.approx(0.25e6)
+    assert d.total == pytest.approx(d.electrolysis + d.heating + d.compression)
+
+
 def test_case_a_energy_demand_vs_gas_loop_model(species, data) -> None:  # type: ignore[no-untyped-def]
     """Case A (50 cells) against Table 20 of Marsigny's thesis (tests/data): electrolysis
-    within 2 % (it follows from the H2 consumption); electrolysis + heating within 5 % of the
-    reference total minus compression (heating here has no heat recovery, an upper bound)."""
+    within 2 % (it follows from the H2 consumption); total within 5 % (heating here has no
+    heat recovery, an upper bound). Compression (isothermal, Shao et al. 2021) gives 0.20
+    vs 0.25 GJ/t (-19 %; the compressor model of the reference is not published): checked
+    within 25 %, a regression guard, not a validation claim."""
     with open(TEST_DATA / "reference_energy_marsigny2025_thesis_t20.csv", encoding="utf-8") as fh:
         ref = {
             r["key"]: float(r["value"])
@@ -88,7 +101,6 @@ def test_case_a_energy_demand_vs_gas_loop_model(species, data) -> None:  # type:
     assert sol.converged
     d = em.furnace_energy_demand(case, sol, species, data)
     assert d.electrolysis / 1e6 == pytest.approx(ref["electrolysis_GJ_per_t"], rel=0.02)
-    assert d.total / 1e6 == pytest.approx(
-        ref["total_GJ_per_t"] - ref["compression_GJ_per_t"], rel=0.05
-    )
+    assert d.total / 1e6 == pytest.approx(ref["total_GJ_per_t"], rel=0.05)
+    assert d.compression / 1e6 == pytest.approx(ref["compression_GJ_per_t"], rel=0.25)
     assert np.isfinite(em.co2_per_dri(d, data.grids["south_africa"].value))

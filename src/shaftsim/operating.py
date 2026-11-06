@@ -55,6 +55,8 @@ class OperatingConditions:
         solid_T: Burden temperature at the top [K].
         pellet_diameter: Pellet diameter [m].
         p: Mean pressure of the furnace [Pa] (see the module docstring).
+        pressures: (top, bustle, cooling) pressures [Pa] for the compression energy; None =
+            keep those of the case the conditions are applied to.
     """
 
     bustle_flow: float
@@ -66,6 +68,7 @@ class OperatingConditions:
     solid_T: float
     pellet_diameter: float
     p: float
+    pressures: tuple[float, float, float] | None = None
 
     def __post_init__(self) -> None:
         if abs(sum(self.x_gas.values()) - 1.0) > 1e-9:
@@ -102,6 +105,7 @@ def conditions_of(case: en.ThermalCase) -> OperatingConditions:
         solid_T=case.T_solid_in,
         pellet_diameter=s.pellet.diameter,
         p=s.p,
+        pressures=case.pressures,
     )
 
 
@@ -126,7 +130,13 @@ def apply(case: en.ThermalCase, oc: OperatingConditions) -> en.ThermalCase:
         p=oc.p,
         side_inlets=(bustle,),
     )
-    return replace(case, shaft=shaft, T_solid_in=oc.solid_T, T_gas_in=oc.cooling_T)
+    return replace(
+        case,
+        shaft=shaft,
+        T_solid_in=oc.solid_T,
+        T_gas_in=oc.cooling_T,
+        pressures=case.pressures if oc.pressures is None else oc.pressures,
+    )
 
 
 def load_cases(cases_yaml: str | Path, base: en.ThermalCase) -> dict[str, OperatingConditions]:
@@ -162,5 +172,6 @@ def load_cases(cases_yaml: str | Path, base: en.ThermalCase) -> dict[str, Operat
             p=mean_pressure(
                 zone, length, v("top_pressure"), v("bustle_pressure"), v("cooling_pressure")
             ),
+            pressures=(v("top_pressure"), v("bustle_pressure"), v("cooling_pressure")),
         )
     return out

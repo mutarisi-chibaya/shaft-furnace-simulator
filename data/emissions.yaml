@@ -7,8 +7,9 @@
 #
 # Scope (docs/validation.md, Milestone 7): the electricity for water electrolysis (fresh H2
 # = the H2 consumed in the furnace) and for heating the bustle gas, as in the gas-loop model
-# of Marsigny et al. (2025b). Gas compression, the heat exchanger of that gas loop, pellet
-# making, the EAF and upstream emissions of plant and equipment are not included.
+# of Marsigny et al. (2025b), plus gas compression (Milestone 8, Shao et al. 2021). The heat
+# exchanger of that gas loop, pellet making, the EAF and upstream emissions of plant and
+# equipment are not included.
 
 electrolysis:
   specific_energy: {value: 18.0e6, unit: J/Nm3, source: Marsigny2025b-S2.2, ref_file: marsigny2025_metals15_862.txt,
@@ -31,6 +32,17 @@ gas_heating:
                         offset: 273.15,
                         note: "gas leaving the condenser of the gas loop, from which the bustle gas is
                                heated (no heat recovery counted here, see docs)"}
+
+compression:
+  # Shao, Wang, Qu, Saxen, Zou (2021) Metall. Mater. Trans. B 52:451, Sec. 2.D, Eq. 12
+  # (isothermal compression from the mixer, W = n R T ln(P_feed / P_m) / eta_c); values from
+  # its text (lines 249-252 of the accepted manuscript; the Greek eta is not in the text layer).
+  efficiency: {value: 0.7, unit: "-", source: Shao2021-S2D, ref_file: shao2021_mmtb52_451.txt,
+               quote: "c = 70%", as_written: "70", factor: 0.01,
+               note: "compressor efficiency eta_c"}
+  inlet_pressure: {value: 101325.0, unit: Pa, source: Shao2021-S2D, ref_file: shao2021_mmtb52_451.txt,
+                   quote: "Pm = 1.0 atm", as_written: "1.0", factor: 101325.0,
+                   note: "outlet pressure of the mixer = compressor inlet (1 atm = 101325 Pa)"}
 
 benchmarks:
   # For orientation on the CO2 figure only. Different system boundaries (see notes).

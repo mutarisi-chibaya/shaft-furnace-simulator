@@ -203,7 +203,8 @@ def plot_co2(base: sc.BaseModel, demand: em.EnergyDemand) -> None:
         0.005,
         f"Electricity {demand.total / 1e6:.1f} GJ/t DRI: electrolysis "
         f"{demand.electrolysis / 1e6:.1f} (18 MJ/Nm³ H₂) + gas heating {demand.heating / 1e6:.1f} "
-        "(η 0.7, no heat recovery); compression, pelletising and EAF excluded.",
+        f"(η 0.7, no heat recovery) + compression {demand.compression / 1e6:.1f}; "
+        "pelletising and EAF excluded.",
         color=INK_2,
         fontsize=7,
     )
@@ -222,7 +223,7 @@ def main() -> None:
     print(
         f"case A, 200 cells: H2 {res.h2_consumption:.2f} kg/t, "
         f"electrolysis {e.electrolysis / 1e6:.2f}, heating {e.heating / 1e6:.2f}, "
-        f"total {e.total / 1e6:.2f} GJ/t DRI"
+        f"compression {e.compression / 1e6:.2f}, total {e.total / 1e6:.2f} GJ/t DRI"
     )
     for g in base.emissions.grids.values():
         print(

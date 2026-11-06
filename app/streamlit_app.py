@@ -455,8 +455,9 @@ def main() -> None:
     breakeven = ng / res.energy.total * 3.6e9
     right.markdown(
         f"""
-Electricity per tonne of DRI: **{res.energy.electrolysis / 1e6:.2f} GJ** for electrolysis and
-**{res.energy.heating / 1e6:.2f} GJ** for gas heating.
+Electricity per tonne of DRI: **{res.energy.electrolysis / 1e6:.2f} GJ** for electrolysis,
+**{res.energy.heating / 1e6:.2f} GJ** for gas heating and
+**{res.energy.compression / 1e6:.2f} GJ** for gas compression.
 
 - On South Africa's grid ({base.emissions.grids["south_africa"].g_per_kWh:.0f} g/kWh in
   {base.emissions.grids["south_africa"].year}) hydrogen DRI emits

@@ -9,8 +9,14 @@ used (data/emissions.yaml):
   the bustle temperature by a heater of efficiency 0.7, assumed electric. Heat recovery
   from the top gas (the heat exchanger of the paper's gas loop) is NOT counted, so this term
   is an upper bound. The cooling gas enters at the condenser temperature and is not heated.
-- **Not included**: gas compression (about 2 % of the total in the paper), pellet making, the
-  EAF, and the emissions of building the plant and the electrolysers.
+- **Gas compression** (Milestone 8): the bustle and cooling gases are compressed from the
+  mixer pressure (1 atm) to their inlet pressures, isothermally at the condenser exit
+  temperature, with a compressor efficiency of 0.7 (Shao et al. 2021, Eq. 12:
+  W = n R T ln(p_out / p_in) / eta_c). The fresh H2 joining at about 25 degC would lower the
+  mixer temperature slightly; using the condenser temperature overestimates this term by a
+  few per cent of itself.
+- **Not included**: heat recovery from the top gas (neither source quantifies it), pellet
+  making, the EAF, and the emissions of building the plant and the electrolysers.
 
 CO2 = electricity per kg DRI x grid intensity (life-cycle, data/grid_intensity.yaml).
 Everything is per kg of DRI in SI units (J/kg, kg CO2/kg). For display: 1 GJ/t = 1 MJ/kg =
@@ -19,6 +25,7 @@ Everything is per kg of DRI in SI units (J/kg, kg CO2/kg). For display: 1 GJ/t =
 
 from __future__ import annotations
 
+import math
 from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
@@ -57,6 +64,8 @@ class EmissionsData:
         electrolysis_per_mol: Electricity per mol of H2 produced [J/mol].
         heater_efficiency: Efficiency of the bustle gas heater [-].
         recycle_T: Temperature of the recycled gas before heating [K].
+        compressor_efficiency: Efficiency of the gas compressor [-].
+        compressor_inlet_p: Pressure of the gas entering the compressor (mixer outlet) [Pa].
         grids: Grid intensities by key (south_africa, world, france).
         benchmarks: Benchmark intensities by key [kg CO2/kg] (different system boundaries,
             see data/emissions.yaml).
@@ -67,6 +76,8 @@ class EmissionsData:
     recycle_T: float
     grids: Mapping[str, GridIntensity]
     benchmarks: Mapping[str, float]
+    compressor_efficiency: float
+    compressor_inlet_p: float
 
 
 def normal_molar_volume(T_n: float, p_n: float) -> float:
@@ -102,6 +113,8 @@ def load_emissions(emissions_yaml: str | Path, grid_yaml: str | Path) -> Emissio
             for k, a in g.items()
         },
         benchmarks={k: float(b["value"]) for k, b in e["benchmarks"].items()},
+        compressor_efficiency=v("compression", "efficiency"),
+        compressor_inlet_p=v("compression", "inlet_pressure"),
     )
 
 
@@ -128,6 +141,24 @@ def gas_heating_power(
     return flow * dh
 
 
+def compression_power(flow: float, T: float, p_out: float, data: EmissionsData) -> float:
+    """Electricity to compress a gas stream isothermally from the mixer pressure [W].
+
+    Shao et al. (2021), Eq. 12: W = n R T ln(p_out / p_in) / eta_c.
+
+    Args:
+        flow: Molar flow [mol/s].
+        T: Gas temperature during compression [K].
+        p_out: Delivery pressure [Pa].
+        data: Emissions parameters (efficiency, inlet pressure).
+    """
+    if p_out <= 0.0 or flow < 0.0:
+        raise ValueError("pressure must be positive and flow non-negative")
+    return (
+        flow * pr.R_GAS * T * math.log(p_out / data.compressor_inlet_p) / data.compressor_efficiency
+    )
+
+
 @dataclass(frozen=True)
 class EnergyDemand:
     """Electricity per kg of DRI [J/kg] (1 MJ/kg = 1 GJ/t).
@@ -135,19 +166,25 @@ class EnergyDemand:
     Attributes:
         electrolysis: Water electrolysis for the fresh H2 [J/kg].
         heating: Bustle gas heating (electricity, no heat recovery) [J/kg].
+        compression: Compression of the bustle and cooling gases [J/kg] (Milestone 8).
     """
 
     electrolysis: float
     heating: float
+    compression: float = 0.0
 
     @property
     def total(self) -> float:
-        """Electrolysis + heating [J/kg]."""
-        return self.electrolysis + self.heating
+        """Electrolysis + heating + compression [J/kg]."""
+        return self.electrolysis + self.heating + self.compression
 
 
 def energy_demand(
-    h2_flow: float, dri_flow: float, heating_power: float, data: EmissionsData
+    h2_flow: float,
+    dri_flow: float,
+    heating_power: float,
+    data: EmissionsData,
+    compression_power: float = 0.0,
 ) -> EnergyDemand:
     """Electricity per kg of DRI.
 
@@ -156,12 +193,14 @@ def energy_demand(
         dri_flow: DRI mass flow [kg/s].
         heating_power: Heat taken up by the bustle gas [W].
         data: Emissions parameters.
+        compression_power: Compressor electricity [W] (:func:`compression_power`).
     """
     if dri_flow <= 0.0:
         raise ValueError("DRI flow must be positive")
     return EnergyDemand(
         electrolysis=h2_flow * data.electrolysis_per_mol / dri_flow,
         heating=heating_power / data.heater_efficiency / dri_flow,
+        compression=compression_power / dri_flow,
     )
 
 
@@ -171,7 +210,10 @@ def furnace_energy_demand(
     species: Mapping[str, pr.Species],
     data: EmissionsData,
 ) -> EnergyDemand:
-    """Electricity per kg of DRI for a solved whole-furnace case (one bustle inlet)."""
+    """Electricity per kg of DRI for a solved whole-furnace case (one bustle inlet).
+
+    Compression uses the case's bustle and cooling pressures (``case.pressures``).
+    """
     s = sol.species
     m_h2 = species["H2"].molar_mass
     if m_h2 is None:
@@ -179,7 +221,13 @@ def furnace_energy_demand(
     h2_flow = s.h2_consumption * (s.product_flow / 1000.0) / m_h2
     bustle = case.shaft.side_inlets[0]
     q = gas_heating_power(species, bustle.x, bustle.flow, data.recycle_T, bustle.T)
-    return energy_demand(h2_flow, s.product_flow, q, data)
+    if case.pressures is None:
+        raise ValueError("the case has no inlet pressures (needed for the compression energy)")
+    _, p_bustle, p_cooling = case.pressures
+    w = compression_power(bustle.flow, data.recycle_T, p_bustle, data) + compression_power(
+        case.shaft.gas_flow, data.recycle_T, p_cooling, data
+    )
+    return energy_demand(h2_flow, s.product_flow, q, data, w)
 
 
 def co2_per_dri(demand: EnergyDemand, grid_intensity: float) -> float:

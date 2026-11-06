@@ -75,6 +75,7 @@ def solve(args: tuple[str, float, int]) -> dict[str, Any]:
         "dri_T_C": sol.T_solid_out - 273.15,
         "electrolysis_GJ_per_t": d.electrolysis / 1e6,
         "heating_GJ_per_t": d.heating / 1e6,
+        "compression_GJ_per_t": d.compression / 1e6,
         "co2_south_africa_t_per_t": em.co2_per_dri(d, data.grids["south_africa"].value),
     }
 
