@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import shutil
 import subprocess
+import urllib.error
 import urllib.request
 from pathlib import Path
 
@@ -58,6 +59,11 @@ REFERENCES: dict[str, tuple[str, str]] = {
         "https://srd.nist.gov/JPCRD/jpcrd1.pdf",
         "Marrero, Mason (1972) J. Phys. Chem. Ref. Data 1:3 (NIST-hosted scan)",
     ),
+    "shao2021_mmtb52_451.pdf": (
+        "https://research.abo.fi/files/33744529/Shao_etal_revised.pdf",
+        "Shao, Wang, Qu, Saxen, Zou (2021) Metall. Mater. Trans. B 52:451 (accepted author "
+        "manuscript, Abo Akademi repository; gas loop, Milestone 8)",
+    ),
     "mmcollisionint_cantera_v3.0.0.cpp": (
         "https://raw.githubusercontent.com/Cantera/cantera/v3.0.0/src/transport/MMCollisionInt.cpp",
         "Cantera v3.0.0 collision-integral tables (Monchick & Mason 1961), BSD-3",
@@ -72,8 +78,16 @@ def main() -> None:
         path = DEST / name
         if not path.exists():
             req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
-            with urllib.request.urlopen(req, timeout=120) as resp:
-                path.write_bytes(resp.read())
+            try:
+                with urllib.request.urlopen(req, timeout=120) as resp:
+                    path.write_bytes(resp.read())
+            except urllib.error.HTTPError as err:
+                # some repositories refuse scripted downloads: fetch by hand in a browser
+                print(
+                    f"NOT downloaded {name}: HTTP {err.code}. Download it by hand from"
+                    f" {url} and save it as {path}, then rerun this script."
+                )
+                continue
             print(f"downloaded {name}  ({note})")
         if pdftotext and name.endswith(".pdf"):
             txt = path.with_suffix(".txt")

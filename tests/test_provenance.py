@@ -92,3 +92,15 @@ def test_wakao_kaguei_quote() -> None:
     wk = raw["wakao_kaguei"]
     assert (wk["a"], wk["b"], wk["m"]) == (2.0, 1.1, 0.6)
     assert wk["n"] == pytest.approx(1 / 3)
+
+
+def test_ergun_quote() -> None:
+    """data/transport.yaml: Ergun constants 150 and 1.75 as printed by Wagner (2008, p. 91,
+    "K = 150 ... + 1,75")."""
+    text = _source_text("wagner2008_thesis.txt")
+    assert text.count("K = 150") == 1
+    assert text.count("+ 1,75") == 1
+    raw = yaml.safe_load((DATA_DIR / "transport.yaml").read_text(encoding="utf-8"))
+    er = raw["ergun"]
+    assert (er["viscous"], er["inertial"]) == (parse_number("150"), parse_number("1,75"))
+    assert er["source"] == "Wagner2008-III.5.4"

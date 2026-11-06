@@ -83,7 +83,50 @@ Results (`build/m8_scratch/m8_order.py`, `m8_caseA2.py`, log `build/m8_caseA2.lo
   change the accuracy verdict.
 
 Decision: keep scheme 1 as default; scheme 2 stays as a tested option for smooth problems,
-documented with its limits. Next: step 3 (Ergun pressure drop).
+documented with its limits. Committed as 3ffa05f.
+
+## Step 3 (Ergun pressure drop): done, not yet committed
+
+- Constants 150 / 1.75 in `data/transport.yaml` (`ergun`), source Wagner2008-III.5.4 (pp. 90-91,
+  Ergun 1952 = his ref. [60]; spherical pellets, no shape factor), row in `data/SOURCES.md`,
+  quote test `tests/test_provenance.py::test_ergun_quote` ("K = 150", "+ 1,75").
+- `transport.Ergun`, `TransportData.ergun`; new module `shaftsim/pressure.py`:
+  `ergun_coefficient`, `pressure_profile` (exact p^2 integration per cell, from the top
+  pressure; bustle = bustle face, cooling = bottom face), `solve_with_pressure` (fixed point
+  pressure <-> solution, 2 iterations in all cases).
+- Local pressure in the kinetics: `ThermalProblem.pressure_cells` (None = uniform mean p, the
+  old behaviour, still the default everywhere). Exact rescaling: a_chem ~ 1/p; a_diff =
+  molecular part (p-free) + Knudsen part ~ 1/p (new table `a_diff_kn`); a_ext and h
+  independent of p. Tested against a direct evaluation at 1.3 p (1e-9).
+- `tests/test_pressure.py` (5 tests, 22 s).
+
+Comparison with REDUCTOR Table 1 (tests/data CSV, outputs), 100 cells, not tuned
+(`build/m8_scratch/m8_ergun.py`, log `build/m8_ergun.log` for B-E, A printed in the session):
+
+| Case | bustle model / REDUCTOR [kPa] | top->bustle dp ratio | cone dp model / REDUCTOR [kPa] | cooling model / REDUCTOR [kPa] |
+|---|---|---|---|---|
+| A | 180.0 / 180.4 | 0.986 | 4.64 / 1.20 | 184.6 / 181.6 |
+| B | 179.1 / 179.6 | 0.983 | 2.16 / 2.30 | 181.3 / 181.9 |
+| C | 207.0 / 212.4 | 0.913 | 8.12 / 3.10 | 215.1 / 215.5 |
+| D | 177.3 / 178.9 | 0.943 | 3.11 / 1.90 | 180.4 / 180.8 |
+| E | 180.0 / 176.7 | 1.125 | 2.91 / 1.50 | 183.0 / 178.2 |
+
+Upper shaft within -9 % to +13 %; cone 0.9-3.9x REDUCTOR (1-D plug flow through the mean
+cross-section of a converging cone; REDUCTOR is 2-D). Effect of local vs mean pressure on the
+solution: A-C negligible (metallisation <= 4e-4, DRI <= 0.3 K). **D and E: DRI changes by
+~20 K** (D 363 -> 343 C, E 236 -> 258 C; E metallisation 0.99974 -> 1.0): the fully
+metallised endpoints that were fragile in Milestone 7; likely sensitivity of the cooling
+front or a different solver end state, not a pressure effect. Check in step 5 (grids).
+
+## Step 4 (Shao et al. 2021 gas loop): waiting for the PDF
+
+Openly accessible as an accepted author manuscript (Abo Akademi repository, "Publisher rights
+policy"; DOI 10.1007/s11663-020-02020-6): https://research.abo.fi/files/33744529/Shao_etal_revised.pdf
+The repository returns HTTP 403 to scripts (also via the urn.fi handle); not bypassed.
+`scripts/fetch_references.py` lists it as `references/shao2021_mmtb52_451.pdf` and prints a
+manual-download instruction. **Needs the user** to save the PDF there by hand, then rerun the
+script (text layer for quotes). Then: read which gas-loop terms (heat recovery, compression)
+and constants it gives, propose how they enter `emissions.furnace_energy_demand`.
 
 ## Goal (approved plan, short)
 

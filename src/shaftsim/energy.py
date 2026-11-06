@@ -48,6 +48,7 @@ Units: SI (K, Pa, mol/s, W, J/mol).
 
 from __future__ import annotations
 
+import math
 from collections.abc import Mapping
 from dataclasses import dataclass, replace
 from functools import cached_property
@@ -227,7 +228,13 @@ def load_furnace_case(furnace_yaml: str | Path, kinetics_yaml: str | Path) -> Th
 
 @dataclass(frozen=True)
 class ThermalProblem:
-    """Everything needed to evaluate the discrete energy and species equations."""
+    """Everything needed to evaluate the discrete energy and species equations.
+
+    ``pressure_cells`` (optional, one value per cell [Pa]) gives a local pressure for the
+    pellet kinetics (Milestone 8, shaftsim.pressure); None = the uniform ``case.shaft.p``.
+    Pressure enters only through the total gas concentration p/RT and the molecular part of
+    the pore diffusivity (both exact rescalings of the tables, see :meth:`cell_coefficients`).
+    """
 
     case: ThermalCase
     species: Mapping[str, pr.Species]
@@ -242,6 +249,7 @@ class ThermalProblem:
     availability_width: float = 0.0
     min_width: float = 0.0
     scheme: int = 1
+    pressure_cells: tuple[float, ...] | None = None
 
     #: Fields that change the solution but not the property tables (see with_parameters).
     TABLE_FREE_FIELDS = frozenset(
@@ -255,6 +263,7 @@ class ThermalProblem:
             "availability_width",
             "min_width",
             "scheme",
+            "pressure_cells",
         }
     )
 
@@ -416,7 +425,7 @@ class ThermalProblem:
         T = np.arange(self.T_TABLE[0], self.T_TABLE[1] + 0.5, 1.0)
         n = T.size
         out: dict[str, FloatArray] = {
-            k: np.empty((3, n)) for k in ("a_chem", "a_diff", "a_ext_kg", "ratio")
+            k: np.empty((3, n)) for k in ("a_chem", "a_diff", "a_diff_kn", "a_ext_kg", "ratio")
         }
         out["T"] = T
         for k in ("kg0", "kg1", "ha0", "ha1", "kgR0", "kgR1", "haR0", "haR1"):
@@ -445,9 +454,23 @@ class ThermalProblem:
                 self.triplets,
                 T_eq=max(Ti, t_eq_min),
             )
+            # Knudsen part of the pore resistance alone (molecular diffusivity -> infinity):
+            # a_diff = molecular part (independent of p) + Knudsen part (~ 1/p), Bosanquet
+            c_kn = pl.step_coefficients(
+                case.pellet,
+                Ti,
+                case.p,
+                1.0,
+                math.inf,
+                self.species,
+                td,
+                self.triplets,
+                T_eq=max(Ti, t_eq_min),
+            )
             for j in range(3):
                 out["a_chem"][j, i] = c[j].a_chem
                 out["a_diff"][j, i] = c[j].a_diff
+                out["a_diff_kn"][j, i] = c_kn[j].a_diff
                 out["a_ext_kg"][j, i] = c[j].a_ext  # a_ext for k_g = 1 m/s
                 out["ratio"][j, i] = c[j].ratio
             kg = sh.bed_mass_transfer_coefficient(replace(case, T=Ti), td)
@@ -524,9 +547,20 @@ class ThermalProblem:
     ) -> tuple[tuple[pl.StepCoefficients, pl.StepCoefficients, pl.StepCoefficients], ...]:
         """Pellet step coefficients per cell: kinetics and pores at T_s, transfer at T_g."""
         kg = self.mass_transfer_kg(Tg)
+        # local pressure: a_chem ~ 1/c_t ~ 1/p; a_diff = molecular part (p-free) + Knudsen part
+        # (~ 1/p); a_ext ~ 1/(k_g c_t) is independent of p (k_g ~ 1/p); tables at case p
+        scale = (
+            None
+            if self.pressure_cells is None
+            else self.case.shaft.p / np.asarray(self.pressure_cells, dtype=float)
+        )
         steps = []
         for j in range(3):
             a_chem = self._interp("a_chem", Ts, j)
+            a_diff = self._interp("a_diff", Ts, j)
+            if scale is not None:
+                a_chem = a_chem * scale
+                a_diff = a_diff + self._interp("a_diff_kn", Ts, j) * (scale - 1.0)
             if self.kinetics is not None:
                 # a_chem ~ 1/k_j(T): exact rescaling from the table triplets to the new ones
                 t_tab = (self.triplets or self.case.shaft.pellet.triplets)[j]
@@ -537,7 +571,7 @@ class ThermalProblem:
             steps.append(
                 (
                     a_chem,
-                    self._interp("a_diff", Ts, j) * self.tortuosity_factor,
+                    a_diff * self.tortuosity_factor,
                     self._interp("a_ext_kg", Ts, j) / kg,
                     self._interp("ratio", Ts, j),
                 )

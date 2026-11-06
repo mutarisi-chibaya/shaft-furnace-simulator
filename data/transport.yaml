@@ -50,3 +50,13 @@ wakao_kaguei:
   m: 0.6
   n: 0.3333333333333333
   source: Wagner2008-III.5.3
+
+# Pressure drop of the gas through the bed, Ergun (1952), as given by Wagner (2008, PhD thesis,
+# Sec. III.5.4, p. 90-91): -grad P = [150 (1 - eps)^2 / (eps^3 d_p^2) mu_g
+#                                     + 1.75 (1 - eps) / (eps^3 d_p) rho_g u_g] u_g,
+# u_g = superficial gas velocity, d_p = pellet diameter (spherical pellets, no shape factor).
+# Text layer of the constants: "K = 150" and "+ 1,75" (the Greek letters are not extracted).
+ergun:
+  viscous: 150.0
+  inertial: 1.75
+  source: Wagner2008-III.5.4

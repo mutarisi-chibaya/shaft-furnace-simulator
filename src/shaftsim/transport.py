@@ -145,6 +145,15 @@ class MarreroMason:
 
 
 @dataclass(frozen=True)
+class Ergun:
+    """Ergun (1952) pressure-drop constants: -dP/dz = [viscous (1 - eps)^2 / (eps^3 d^2) mu
+    + inertial (1 - eps) / (eps^3 d) rho u] u (u superficial velocity) [-]."""
+
+    viscous: float
+    inertial: float
+
+
+@dataclass(frozen=True)
 class TransportData:
     """Everything needed for transport properties: force constants, molar masses, tables."""
 
@@ -156,6 +165,7 @@ class TransportData:
     normal_pressure: float
     correlations: Mapping[frozenset[str], MarreroMason]
     wakao_kaguei: RanzMarshall | None = None
+    ergun: Ergun | None = None
 
 
 def load_collision_integrals(path: str | Path) -> CollisionIntegrals:
@@ -212,6 +222,11 @@ def load_transport(
         wakao_kaguei=(
             RanzMarshall(*(float(raw["wakao_kaguei"][k]) for k in ("a", "b", "m", "n")))
             if "wakao_kaguei" in raw
+            else None
+        ),
+        ergun=(
+            Ergun(float(raw["ergun"]["viscous"]), float(raw["ergun"]["inertial"]))
+            if "ergun" in raw
             else None
         ),
     )
