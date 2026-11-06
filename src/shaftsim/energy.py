@@ -241,6 +241,7 @@ class ThermalProblem:
     transfer_mix: float = 0.0
     availability_width: float = 0.0
     min_width: float = 0.0
+    scheme: int = 1
 
     #: Fields that change the solution but not the property tables (see with_parameters).
     TABLE_FREE_FIELDS = frozenset(
@@ -253,6 +254,7 @@ class ThermalProblem:
             "transfer_mix",
             "availability_width",
             "min_width",
+            "scheme",
         }
     )
 
@@ -312,12 +314,24 @@ class ThermalProblem:
         return out
 
     def oxygen_removed(self, f: FloatArray) -> FloatArray:
-        """Oxygen removed in each cell [mol/s], from the gas balance (mixed inflow - outflow)."""
+        """Oxygen removed in each cell [mol/s], from the gas balance (mixed inflow - outflow),
+        with the face values of the scheme (:meth:`faces`)."""
         gr = self.grid
         case = self.case.shaft
+        fo = self.faces(f, downward=False)
         F_below = np.concatenate([gr.F[1:], [case.gas_flow]])
-        f_below = np.concatenate([f[1:], [case.x_in["H2"]]])
-        return np.asarray(F_below * f_below + gr.S * gr.f_side - gr.F * f)
+        f_below = np.concatenate([fo[1:], [case.x_in["H2"]]])
+        return np.asarray(F_below * f_below + gr.S * gr.f_side - gr.F * fo)
+
+    def faces(self, phi: FloatArray, downward: bool, temperature: bool = False) -> FloatArray:
+        """Outflow-face values of a cell quantity: the cell values for scheme 1, the MUSCL
+        reconstruction of :func:`shaftsim.shaft.outflow_faces` for scheme 2 (limiter
+        regularisation for fractions or, with ``temperature``, for temperatures)."""
+        if self.scheme == 1:
+            return phi
+        gr = self.grid
+        eps = sh.LIMITER_EPS_T if temperature else sh.LIMITER_EPS_FRACTION
+        return sh.outflow_faces(phi, gr.z, gr.dz, downward, eps)
 
     def gangue_flows(self) -> dict[str, float]:
         """Molar flows of the gangue oxides [mol/s]."""
@@ -554,6 +568,7 @@ class ThermalProblem:
             cc,
             availability_width=self.availability_width,
             min_width=self.min_width,
+            scheme=self.scheme,
         )
 
     # ------------------------------------------------------------------ energy equations
@@ -564,9 +579,11 @@ class ThermalProblem:
         """Energy residuals [W], ordering per cell (solid, gas)."""
         case = self.case.shaft
         gr = self.grid
-        Hs, _ = self.solid_enthalpy(X, Ts)
+        # enthalpy flows on the outflow faces (cell states in scheme 1); the exchange terms
+        # use the cell states and cancel between the phases, so the balance stays exact
+        Hs, _ = self.solid_enthalpy(self.faces(X, True), self.faces(Ts, True, True))
         Hs_in, _ = self.solid_enthalpy(np.zeros((3, 1)), np.array([self.case.T_solid_in]))
-        Hg, _ = self.gas_enthalpy(f, Tg, gr.F, gr.g)
+        Hg, _ = self.gas_enthalpy(self.faces(f, False), self.faces(Tg, False, True), gr.F, gr.g)
         f_in = case.x_in["H2"]
         Hg_in, _ = self.gas_enthalpy(np.array([f_in]), np.array([self.case.T_gas_in]))
         Hs_up = np.concatenate([Hs_in, Hs[:-1]])
@@ -587,7 +604,12 @@ class ThermalProblem:
         tol: float = 1e-6,
         max_iter: int = 50,
     ) -> tuple[FloatArray, FloatArray, float]:
-        """Newton's method for (T_s, T_g) at frozen species; returns (Ts, Tg, max |dT| last)."""
+        """Newton's method for (T_s, T_g) at frozen species; returns (Ts, Tg, max |dT| last).
+
+        Scheme 1 only (the analytic Jacobian assumes donor-cell fluxes).
+        """
+        if self.scheme != 1:
+            raise ValueError("solve_energy handles scheme 1 only; use shaftsim.coupled")
         UA = self.heat_transfer_UA(Tg)
         n_o = self.oxygen_removed(f)
         gr = self.grid

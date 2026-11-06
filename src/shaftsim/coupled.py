@@ -137,13 +137,20 @@ FD_STEP = np.array([1e-9, 1e-9, 1e-9, 1e-8, 1e-4, 1e-4])
 def jacobian(
     prob: en.ThermalProblem, z: FloatArray, scales: FloatArray, r0: FloatArray
 ) -> sp.csc_matrix:
-    """Block-tridiagonal Jacobian of :func:`residual_internal` by coloured finite differences."""
+    """Banded Jacobian of :func:`residual_internal` by coloured finite differences.
+
+    A cell's residual depends on the cells within ``bw`` of it: bw = 1 for the first-order
+    scheme (block-tridiagonal, 3 colours), bw = 2 for the second-order scheme (the face
+    reconstruction reaches one cell further; 5 colours).
+    """
     n = prob.n_cells
+    bw = 1 if prob.scheme == 1 else 2
+    ncol = 2 * bw + 1
     rows: list[NDArray[np.int_]] = []
     cols: list[NDArray[np.int_]] = []
     vals: list[FloatArray] = []
-    for colour in range(3):
-        cells = np.arange(colour, n, 3)
+    for colour in range(ncol):
+        cells = np.arange(colour, n, ncol)
         for v in range(N_VAR):
             h = FD_STEP[v]
             # one-sided step pointing into the admissible range
@@ -153,7 +160,7 @@ def jacobian(
             zp[idx] += sign * h
             dr = (residual_internal(prob, zp, scales) - r0).reshape(n, N_VAR)
             for c, s in zip(cells, sign, strict=True):
-                for nb in (c - 1, c, c + 1):
+                for nb in range(c - bw, c + bw + 1):
                     if 0 <= nb < n:
                         rows.append(np.arange(nb * N_VAR, (nb + 1) * N_VAR))
                         cols.append(np.full(N_VAR, c * N_VAR + v))
@@ -440,7 +447,7 @@ def solve_thermal_coupled(
 
     n = prob.n_cells
     n_c = n // 2 if n > coarse_cells else n
-    cprob = replace(prob, n_cells=n_c)
+    cprob = replace(prob, n_cells=n_c, scheme=1)  # alternating solver: first order only
     cprob.__dict__["_tables"] = prob._tables  # tables do not depend on the grid
     start = en.solve_thermal(cprob, tol_T=1e-4, species_tol=1e-8)
     return finish_coupled(prob, start, smoothing, species_tol, energy_tol, max_iter)

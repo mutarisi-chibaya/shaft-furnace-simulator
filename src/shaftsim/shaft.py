@@ -258,6 +258,58 @@ class Grid:
     side_cells: tuple[int, ...]
 
 
+#: Limiter regularisation (gradient scale below which the reconstruction fades to first
+#: order) for mole/conversion fractions [1/m] and temperatures [K/m]. Numerical choices:
+#: without it the limiter has a kink where both gradients vanish (flat zones, e.g. where the
+#: gas is buffered at the magnetite/wustite equilibrium), on which Newton's method stalls;
+#: where gradients are this small the first-order face error (dz^2 * gradient) is negligible.
+LIMITER_EPS_FRACTION = 1e-6
+LIMITER_EPS_T = 1e-3
+
+
+def outflow_faces(
+    phi: FloatArray, z: FloatArray, dz: FloatArray, downward: bool, eps: float = 0.0
+) -> FloatArray:
+    """Value of a transported quantity on the outflow face of each cell (second order).
+
+    MUSCL reconstruction with the van Albada limiter applied to gradients:
+    a, b = upstream and downstream gradients (difference / centre spacing, so the scheme
+    stays second order where segments of different cell heights meet),
+    g = a b (a + b) / (a^2 + b^2 + eps^2), face = phi + g dz / 2 towards the
+    outflow. For a linear profile g = a = b (exact); for a monotone profile the face value
+    lies between the cell and its downstream neighbour (the limiter is TVD for r > 0), so
+    conversions stay in [0, 1]. With eps > 0, g is analytic in a and b (also where both
+    vanish) and the scheme fades to first order where |a|, |b| << eps.
+    The first and last cells keep first-order faces (face = cell value): each then acts as
+    one backward-Euler step (local error O(h^2)), which keeps the global order 2, and the
+    outlet values are the cell values exactly as in the first-order scheme.
+
+    Args:
+        phi: Cell values, shape (..., n), cell 0 at the top.
+        z: Cell-centre depths [m], shape (n,).
+        dz: Cell heights [m], shape (n,).
+        downward: Flow direction (True: solid, towards larger z; False: gas, upward).
+        eps: Limiter regularisation [units of phi per m]; 0 = plain van Albada.
+
+    Returns:
+        Outflow face values, same shape as ``phi``.
+    """
+    phi = np.asarray(phi, dtype=float)
+    out = phi.copy()
+    if phi.shape[-1] < 3:
+        return out
+    c = phi[..., 1:-1]
+    above = (c - phi[..., :-2]) / (z[1:-1] - z[:-2])  # gradient towards the cell above
+    below = (phi[..., 2:] - c) / (z[2:] - z[1:-1])  # gradient towards the cell below
+    a, b = (above, below) if downward else (below, above)
+    den = a * a + b * b + eps * eps
+    with np.errstate(divide="ignore", invalid="ignore"):
+        g = np.where(den > 0.0, a * b * (a + b) / den, 0.0)
+    half = 0.5 * dz[1:-1]
+    out[..., 1:-1] = c + (g * half if downward else -g * half)
+    return out
+
+
 def make_grid(case: ShaftCase, n_cells: int) -> Grid:
     """Build the finite-volume grid of a case.
 
@@ -347,6 +399,10 @@ class ShaftProblem:
             infinite a_chem (zero rate).
         availability_width, min_width: Smoothing of the availability constraint (see
             :func:`shaftsim.pellet.step_rates_array`); 0 = the original discontinuous rule.
+        scheme: 1 = first-order upwind (donor cell: the outflow of a cell carries the cell
+            value); 2 = second-order MUSCL faces (:func:`outflow_faces`). Both are
+            conservative. Scheme 2 couples each cell to two neighbours on each side, so it
+            is solved by shaftsim.coupled only (the marching species solvers assume 1).
     """
 
     case: ShaftCase
@@ -358,6 +414,7 @@ class ShaftProblem:
     ) = None
     availability_width: float = 0.0
     min_width: float = 0.0
+    scheme: int = 1
 
     def coeffs_of(
         self, i: int
@@ -420,19 +477,35 @@ class ShaftProblem:
         """Upper bound of the H2 fraction anywhere: the largest inlet H2 fraction [-]."""
         return float(max([self.f_in] + [s.x["H2"] for s in self.case.side_inlets]))
 
+    def gas_faces(self, f: FloatArray) -> FloatArray:
+        """H2 fraction on the upper (outflow) face of each cell [-]: the cell value for
+        scheme 1, :func:`outflow_faces` for scheme 2."""
+        if self.scheme == 1:
+            return f
+        gr = self.grid
+        return outflow_faces(f, gr.z, gr.dz, downward=False, eps=LIMITER_EPS_FRACTION)
+
+    def solid_faces(self, X: FloatArray) -> FloatArray:
+        """Step conversions on the lower (outflow) face of each cell, shape (3, n)."""
+        if self.scheme == 1:
+            return X
+        gr = self.grid
+        return outflow_faces(X, gr.z, gr.dz, downward=True, eps=LIMITER_EPS_FRACTION)
+
     def mixed_inflow(self, f: FloatArray) -> FloatArray:
         """H2 fraction of the gas entering each cell from below, mixed with any side gas [-].
 
-        f_mix,i = (F_{i+1} f_{i+1} + S_i f_s,i) / F_i, with the bottom inlet below the last cell.
+        f_mix,i = (F_{i+1} f_{i+1} + S_i f_s,i) / F_i, with the bottom inlet below the last
+        cell; f_{i+1} is the value on the upper face of cell i+1 (its cell value in scheme 1).
         """
         gr = self.grid
         F_below = np.concatenate([gr.F[1:], [self.case.gas_flow]])
-        f_below = np.concatenate([f[1:], [self.f_in]])
+        f_below = np.concatenate([self.gas_faces(f)[1:], [self.f_in]])
         return np.asarray((F_below * f_below + gr.S * gr.f_side) / gr.F)
 
     def oxygen_removed(self, f: FloatArray) -> FloatArray:
         """Oxygen removed from the solid in each cell [mol/s] (= H2 consumed), from the gas."""
-        return np.asarray(self.grid.F * (self.mixed_inflow(f) - f))
+        return np.asarray(self.grid.F * (self.mixed_inflow(f) - self.gas_faces(f)))
 
     def unpack(self, y: FloatArray) -> tuple[FloatArray, FloatArray]:
         """Unknown vector -> (X shape (3, n), f shape (n,)). Ordering per cell: X1, X2, X3, f."""
@@ -463,11 +536,12 @@ class ShaftProblem:
             availability_width=self.availability_width,
             min_width=self.min_width,
         )
-        X_up = np.concatenate([np.zeros((3, 1)), X[:, :-1]], axis=1)
-        res_s = (X - X_up) - gr.kappa * r
-        xbar = np.asarray(pl.overall_conversion(X))
+        Xo = self.solid_faces(X)  # outflow (lower) faces; = X in scheme 1
+        X_up = np.concatenate([np.zeros((3, 1)), Xo[:, :-1]], axis=1)
+        res_s = (Xo - X_up) - gr.kappa * r
+        xbar = np.asarray(pl.overall_conversion(Xo))
         xbar_up = np.concatenate([[0.0], xbar[:-1]])
-        res_g = (self.mixed_inflow(f) - f) - self.c_cell * (xbar - xbar_up)
+        res_g = (self.mixed_inflow(f) - self.gas_faces(f)) - self.c_cell * (xbar - xbar_up)
         return np.column_stack([res_s.T, res_g]).ravel()
 
 

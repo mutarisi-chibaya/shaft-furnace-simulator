@@ -372,7 +372,13 @@ def solve(
     Returns:
         The solution vector and convergence statistics. The caller must check
         ``stats.converged``; an unconverged result is returned, not hidden.
+
+    Raises:
+        ValueError: For the second-order scheme (shooting and sweeps march cell by cell
+            and assume first-order upwinding); use shaftsim.coupled.
     """
+    if problem.scheme != 1:
+        raise ValueError("solver.solve handles scheme 1 only; use shaftsim.coupled")
     history: list[float] = []
     method = "sweeps"
     if y0 is None:

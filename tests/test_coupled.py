@@ -208,3 +208,90 @@ def test_smooth_min_keeps_step_at_rest() -> None:
     assert r[1, 0] == 0.0 and r[2, 0] == 0.0
     assert np.all(r[2] <= exact[2] * (1 + 1e-15))
     assert np.all(r >= 0.0)
+
+
+# ----------------------------------------------------------------------------- scheme 2
+
+
+def test_outflow_faces_exact_for_linear_profiles_on_nonuniform_grid() -> None:
+    dz = np.array([0.1, 0.1, 0.3, 0.3, 0.3, 0.05, 0.05, 0.2])
+    zf = np.concatenate([[0.0], np.cumsum(dz)])
+    z = 0.5 * (zf[:-1] + zf[1:])
+    phi = 2.0 + 3.0 * z
+    down = sh.outflow_faces(phi, z, dz, downward=True)
+    up = sh.outflow_faces(phi, z, dz, downward=False)
+    np.testing.assert_allclose(down[1:-1], 2.0 + 3.0 * zf[2:-1], rtol=0, atol=1e-13)
+    np.testing.assert_allclose(up[1:-1], 2.0 + 3.0 * zf[1:-2], rtol=0, atol=1e-13)
+    # end cells: first order (face = cell value)
+    assert down[0] == phi[0] and down[-1] == phi[-1] and up[0] == phi[0] and up[-1] == phi[-1]
+
+
+def test_outflow_faces_stay_between_neighbours_for_monotone_profiles() -> None:
+    rng = np.random.default_rng(11)
+    n = 60
+    z = np.arange(n) + 0.5
+    dz = np.ones(n)
+    phi = np.sort(rng.random(n)) ** 3  # monotone, strongly varying slopes
+    phi[-10:] = 1.0  # flat at complete conversion
+    down = sh.outflow_faces(phi, z, dz, downward=True)
+    assert np.all(down[:-1] >= phi[:-1] - 1e-15)
+    assert np.all(down[:-1] <= phi[1:] + 1e-15)
+    assert np.all(down <= 1.0)
+
+
+def test_scheme2_fluxes_telescope(prob: en.ThermalProblem, alternating: en.ThermalSolution) -> None:
+    """Second-order faces are conservative for any state, converged or not: the sum of the
+    cell energy residuals equals the boundary enthalpy flows, and the sum of the gas
+    residuals (times F) equals H2 in - out - oxygen removed (in - out of the solid)."""
+    p2 = prob.with_parameters(scheme=2)
+    rng = np.random.default_rng(4)
+    s = alternating
+    n = prob.n_cells
+    X = np.clip(s.species.X_steps + 0.01 * rng.standard_normal((3, n)), 0.0, 1.0)
+    f = s.species.x_H2 * (1 + 0.01 * rng.standard_normal(n))
+    Ts, Tg = s.Ts + rng.standard_normal(n), s.Tg + rng.standard_normal(n)
+    gr = p2.grid
+    r = p2.energy_residual(X, f, Ts, Tg, p2.heat_transfer_UA(Tg)).reshape(n, 2)
+    Hs_in = p2.solid_enthalpy(np.zeros((3, 1)), np.array([p2.case.T_solid_in]))[0][0]
+    Hg_in = p2.gas_enthalpy(np.array([p2.case.shaft.x_in["H2"]]), np.array([p2.case.T_gas_in]))[0][
+        0
+    ]
+    Hs_out = p2.solid_enthalpy(X[:, -1:], Ts[-1:])[0][0]
+    Hg_out = p2.gas_enthalpy(f[:1], Tg[:1], gr.F[:1], gr.g[:1])[0][0]
+    expected = Hs_out - Hs_in + Hg_out - Hg_in - float(np.sum(p2.side_enthalpy))
+    assert float(np.sum(r)) == pytest.approx(expected, rel=1e-11, abs=1e-6 * abs(Hs_in))
+    sp2 = p2.species_problem(Ts, Tg)
+    rg = sp2.residual(sp2.pack(X, f)).reshape(n, 4)[:, 3] * gr.F
+    case = p2.case.shaft
+    h2_in = case.gas_flow * case.x_in["H2"] + float(np.sum(gr.S * gr.f_side))
+    o_out = case.removable_oxygen_flow * float(pl.overall_conversion(X[:, -1]))
+    assert float(np.sum(rg)) == pytest.approx(h2_in - gr.F[0] * f[0] - o_out, rel=1e-11)
+
+
+def test_scheme2_second_order_without_reactions(prob: en.ThermalProblem) -> None:
+    """Reaction-free heat exchange (h x 3e-3, as in the shooting-reference test of
+    test_energy): grid self-convergence ratio of the top gas temperature on 25/50/100 cells
+    is about 4 for scheme 2 (2 for scheme 1). The reacting solution has kinks (availability,
+    equilibrium switch-off), where any scheme is first order (docs/validation.md, M8)."""
+    tops = []
+    for n in (25, 50, 100):
+        p = prob.with_parameters(n_cells=n, rate_multiplier=0.0, h_multiplier=3e-3)
+        s1 = en.solve_thermal(p, tol_T=1e-9, species_tol=1e-11)
+        y, st = cp.solve_coupled(p.with_parameters(scheme=2), _y(s1), energy_tol=1e-9)
+        assert st.converged
+        tops.append(cp.unpack(y, n)[3][0])
+    ratio = (tops[0] - tops[1]) / (tops[1] - tops[2])
+    assert 3.6 < ratio < 4.4
+
+
+def test_scheme_guards(prob: en.ThermalProblem, alternating: en.ThermalSolution) -> None:
+    """The marching species solver and the energy Newton refuse the second-order scheme
+    (they assume donor-cell fluxes)."""
+    from shaftsim import solver as sv
+
+    p2 = prob.with_parameters(scheme=2)
+    s = alternating
+    with pytest.raises(ValueError):
+        sv.solve(p2.species_problem(s.Ts, s.Tg))
+    with pytest.raises(ValueError):
+        p2.solve_energy(s.species.X_steps, s.species.x_H2, s.Ts, s.Tg)

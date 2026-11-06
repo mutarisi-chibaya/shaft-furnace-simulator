@@ -53,6 +53,38 @@ New: `coupled.thermal_solution`, `coupled.finish_coupled`, `coupled.solve_therma
 (alternating start on half the cells, coupled finish), `tests/test_coupled.py` (9 tests,
 13 s).
 
+## Step 1 committed (f4a2516). Step 2 (second-order scheme): stopped at the time box
+
+Stop rule agreed with the user: about 2 h per step; a missed target is reported, never
+relaxed silently, and the working state is kept.
+
+Implemented (default `scheme = 1` everywhere, so production is unchanged):
+`shaft.outflow_faces` (MUSCL, van Albada on gradients so segment junctions stay second order,
+regularisation `LIMITER_EPS_FRACTION = 1e-6 /m`, `LIMITER_EPS_T = 1e-3 K/m`, first-order end
+cells), `ShaftProblem.scheme`, `ThermalProblem.scheme` / `faces`, face fluxes in the species,
+gas and energy residuals, 5-colour Jacobian for scheme 2, guards in `solver.solve` and
+`solve_energy` (scheme 1 only). Tests: linear exactness on a non-uniform grid, monotone
+bounds, flux telescoping for arbitrary states, self-convergence ratio ~4, guards.
+
+Results (`build/m8_scratch/m8_order.py`, `m8_caseA2.py`, log `build/m8_caseA2.log`):
+- Reaction-free reference (h x 3e-3) vs RK45 shooting: top-gas error 25/50/100/200/400
+  cells: scheme 1 7.8/3.9/2.0/0.99/0.50 K (order 1.00), scheme 2 0.72/0.19/0.049/0.012/0.0031 K
+  (order 1.92-1.99). **Target met.**
+- Case A with reactions, metallisation: scheme 1 0.9456/0.9367/0.9237/0.9157 (50-400);
+  scheme 2 0.9319 (100), 0.9195 (200); 50 and 400 cells **did not converge**. Extrapolated
+  limit about 0.908-0.911, so 100 cells is ~0.02 away: **target "within 0.005" missed**,
+  by both schemes. Reason: the reacting solution has kinks (X3 pinned to X2, rates switched
+  off at equilibrium, thin cooling front at the outlet), where any scheme is first order;
+  scheme 2 there gains roughly a factor 2 in cells, not an order.
+- Scheme 2 convergence of the coupled solver is not robust: stalls in the
+  equilibrium-buffered zone (X2, X3 ~ 1e-8 at the onset) on 40, 50 and 400 cells. Tried:
+  limiter eps (worse), homotopy scheme 1 -> 2 (fails at theta = 0.25), allowing X < 0
+  (better, still stalls; no cell actually goes negative). Not pursued further: it would not
+  change the accuracy verdict.
+
+Decision: keep scheme 1 as default; scheme 2 stays as a tested option for smooth problems,
+documented with its limits. Next: step 3 (Ergun pressure drop).
+
 ## Goal (approved plan, short)
 
 1. **Fully coupled Newton solver** (species + energy in one system) that converges where the
